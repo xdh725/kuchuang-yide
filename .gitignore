@@ -30,3 +30,4 @@
 # Environment
 .env
 .env.local
+vectors.json

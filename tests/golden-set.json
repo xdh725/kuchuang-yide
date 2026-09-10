@@ -1,0 +1,10 @@
+[
+  { "q": "What magnet grade do you use for drone motors?", "expected_kb_id": "KB-RM-002", "lang": "en" },
+  { "q": "What is the maximum working temperature of your magnets?", "expected_kb_id": "KB-RM-002", "lang": "en" },
+  { "q": "你们无人机电机用什么等级的磁钢？", "expected_kb_id": "KB-RM-002", "lang": "zh" },
+  { "q": "What is the rated current of model KC-4215?", "expected_kb_id": "KB-MD-001", "lang": "en" },
+  { "q": "KC-4215 的额定电压是多少？", "expected_kb_id": "KB-MD-001", "lang": "zh" },
+  { "q": "How much does the KC-4215 motor weigh?", "expected_kb_id": "KB-MD-001", "lang": "en" },
+  { "q": "Do you perform dynamic balancing on your rotors?", "expected_kb_id": "KB-PR-003", "lang": "en" },
+  { "q": "你们做动平衡吗？", "expected_kb_id": "KB-PR-003", "lang": "zh" }
+]

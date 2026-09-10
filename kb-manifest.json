@@ -1,0 +1,37 @@
+[
+  {
+    "id": "KB-MD-001",
+    "title": "KC-4215 Outrunner BLDC Motor Specifications",
+    "tags": [
+      "model",
+      "kc-4215",
+      "drone",
+      "spec"
+    ],
+    "type": "spec-sheet",
+    "file": "models/kc-4215.md"
+  },
+  {
+    "id": "KB-PR-003",
+    "title": "Dynamic Balance Process",
+    "tags": [
+      "process",
+      "dynamic-balance",
+      "qc"
+    ],
+    "type": "text",
+    "file": "processes/dynamic-balance.md"
+  },
+  {
+    "id": "KB-RM-002",
+    "title": "N35SH Magnet Incoming Inspection",
+    "tags": [
+      "raw-material",
+      "magnet",
+      "n35sh",
+      "incoming-inspection"
+    ],
+    "type": "text",
+    "file": "raw-materials/magnet-n35sh.md"
+  }
+]

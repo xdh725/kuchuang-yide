@@ -1,0 +1,36 @@
+name = "kuchuang-yide"
+compatibility_date = "2026-09-01"
+main = "src/index.js"
+
+[[vectorize_indexes]]
+binding = "KB"
+index_name = "kcyd-kb"
+dimensions = 2048          # 智谱 embedding-3 输出维度
+metric = "cosine"
+
+[[kv_namespaces]]
+binding = "COUNTERS"
+id = "PLACEHOLDER_KV_ID"   # wrangler kv namespace create 后填回
+
+[[unsafe.bindings]]        # 原子 IP 限流（chat）
+name = "CHAT_RL"
+type = "ratelimit"
+[unsafe.bindings.options]
+namespace_id = "1001"
+simple = { limit = 20, period = 3600 }
+
+[vars]
+ZHIPU_BASE = "https://open.bigmodel.cn/api/paas/v4"
+CHAT_MODEL = "glm-4.6"
+FILTER_MODEL = "glm-4.5-air"
+EMBED_MODEL = "embedding-3"
+KB_THRESHOLD = "0.42"      # 初值，黄金集校准后覆盖（docs/ai-guide-implementation.md §6）
+TOP_K = "5"
+DAILY_CHAT_CAP = "5000"
+GATE_ENABLED = "true"      # 黄金集命中率≥80% 才放行 AI；false=强制全兜底（上线前开关）
+
+# secrets（wrangler secret put）：
+# ZHIPU_API_KEY / FEISHU_WEBHOOK / TURNSTILE_SECRET
+
+[observability]
+enabled = true
