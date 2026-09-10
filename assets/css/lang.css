@@ -1,12 +1,14 @@
-/* Language switcher — small, no webfont, works on mobile. */
+/* Language switcher — tuned for the dark precision theme. */
 .lang-switch {
-  display: inline-flex; align-items: center; gap: 6px;
-  border: 1px solid var(--line); border-radius: 999px;
-  padding: 3px 8px; background: var(--card); font-size: 13px;
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  padding: 4px 10px; background: rgba(15, 23, 41, 0.7); font-size: 13px;
 }
-.lang-switch label { color: var(--muted); cursor: pointer; }
+.lang-switch label { cursor: pointer; opacity: 0.8; }
 .lang-switch select {
-  border: none; background: transparent; font: inherit; color: var(--brand);
-  cursor: pointer; padding: 2px;
+  border: none; background: transparent; font: inherit; font-weight: 600;
+  color: var(--ink); cursor: pointer; padding: 2px;
 }
+.lang-switch select option { background: var(--bg-2); color: var(--ink); }
 .lang-switch select:focus { outline: none; }
+.lang-switch:focus-within { border-color: var(--brand); }
