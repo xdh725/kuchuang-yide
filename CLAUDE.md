@@ -36,7 +36,9 @@ assets/     前端静态资源（css / js / img / video）
 - `workers/public-admin/admin.html`：单页后台（登录→素材CRUD→媒体上传R2→重建索引→黄金集管理/命中测试）
 - API：`workers/src/admin.js`（D1 `entries`/`golden` 表）+ `auth.js`（单管理员密码，ADMIN_PASSWORD secret）
 - 部署后访问 `https://<workers域名>/admin`；素材存 D1，媒体存 R2，重建索引=embedding→Vectorize
-- 首次部署：`wrangler d1 execute kcyd-kb --file=schema.sql` 建表 + `wrangler secret put ADMIN_PASSWORD`
+- **已部署**：https://kuchuang-yide.xdh725-kcyd.workers.dev （/admin 后台，ADMIN_PASSWORD 见 wrangler secret）
+- 资源已建：D1 kcyd-kb（e5fe283d）/ KV COUNTERS（fbe64aca）/ Vectorize kcyd-kb（1536维，智谱MRL截断）/ R2 kcyd-media（待控制台开通后加回 wrangler.toml 注释的 MEDIA 绑定）
+- 生产调试要点：GLM 调用必须 thinking disabled（思考链会耗尽 max_tokens 致 content 空）；CF 边缘→智谱北京往返慢，超时 30s；curl 测试要带浏览器 UA（CF bot 防护挡默认 UA）
 - D1/R2/KV 的 PLACEHOLDER ID 创建资源后填回 wrangler.toml
 
 ## 多语言（i18n）

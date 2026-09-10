@@ -42,7 +42,7 @@ export async function postFilter(env, reply, snippets) {
         content:
           'SNIPPETS:\n' + ctx + '\n\nDRAFT ANSWER:\n' + reply + '\n\nJSON verdict:',
       },
-    ], { temperature: 0, max_tokens: 200 });
+    ], { temperature: 0, max_tokens: 400, noThinking: true });
 
     // 从输出中提取 JSON（容忍模型前后带杂文字）
     const m = out.match(/\{[\s\S]*\}/);

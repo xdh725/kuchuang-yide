@@ -32,7 +32,7 @@ export async function runHarness(env, snippets, question, lang) {
       content:
         'Knowledge base snippets:\n' + ctx + '\n\nCustomer question: ' + question,
     },
-  ], { temperature: 0.2, max_tokens: 600 });
+  ], { temperature: 0.2, max_tokens: 600, noThinking: true });
 }
 
 // 来源标签：用 top-1 命中的元数据（不靠模型自觉，后端拼）

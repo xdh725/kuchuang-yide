@@ -35,7 +35,7 @@ async function embedBatch(texts) {
   const r = await fetch(BASE + '/embeddings', {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'embedding-3', input: texts }),
+    body: JSON.stringify({ model: 'embedding-3', input: texts, dimensions: 1536 }),
   });
   if (!r.ok) throw new Error('embed HTTP ' + r.status + ' ' + (await r.text()).slice(0, 200));
   const d = await r.json();

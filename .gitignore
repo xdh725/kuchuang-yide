@@ -31,3 +31,7 @@
 .env
 .env.local
 vectors.json
+workers/.dev.vars
+
+# deps
+workers/node_modules/

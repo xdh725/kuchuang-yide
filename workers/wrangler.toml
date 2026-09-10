@@ -1,32 +1,32 @@
 name = "kuchuang-yide"
 compatibility_date = "2026-09-01"
 main = "src/index.js"
-assets = { directory = "../public-admin", binding = "ASSETS" }   # /admin 后台页（仅此一页走资产）
+assets = { directory = "./public-admin", binding = "ASSETS" }   # /admin 后台页（仅此一页走资产）
 
-[[vectorize_indexes]]
+[[vectorize]]
 binding = "KB"
 index_name = "kcyd-kb"
-dimensions = 2048          # 智谱 embedding-3 输出维度
-metric = "cosine"
 
 [[kv_namespaces]]
 binding = "COUNTERS"
-id = "PLACEHOLDER_KV_ID"   # wrangler kv namespace create 后填回
+id = "fbe64aca86684f5bb81c13519ccf01e8"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "kcyd-kb"
-database_id = "PLACEHOLDER_D1_ID"   # wrangler d1 create 后填回
+database_id = "e5fe283d-047d-4947-a1cc-d1cb540ef7df"
 
-[[r2_buckets]]
-binding = "MEDIA"                    # 后台上传的图片/视频
+# [[r2_buckets]]
+# binding = "MEDIA"                  # 后台上传的图片/视频（待控制台开通 R2 后取消注释）
 
-[[unsafe.bindings]]        # 原子 IP 限流（chat）
+# 原子 IP 限流（chat）：3次/60秒/IP；period 枚举仅 10/60；本地 dev 由 ratelimit.js 兜底
+[[unsafe.bindings]]
 name = "CHAT_RL"
 type = "ratelimit"
-[unsafe.bindings.options]
 namespace_id = "1001"
-simple = { limit = 20, period = 3600 }
+[unsafe.bindings.simple]
+limit = 3     # 3 次/60秒/IP（=180/小时）；RL binding period 仅支持 10 或 60
+period = 60
 
 [vars]
 ZHIPU_BASE = "https://open.bigmodel.cn/api/paas/v4"
