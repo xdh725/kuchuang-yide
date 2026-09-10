@@ -38,6 +38,7 @@ assets/     前端静态资源（css / js / img / video）
 - 部署后访问 `https://<workers域名>/admin`；素材存 D1，媒体存 R2，重建索引=embedding→Vectorize
 - **已部署**：https://kuchuang-yide.xdh725-kcyd.workers.dev （/admin 后台，ADMIN_PASSWORD 见 wrangler secret）
 - 资源已建：D1 kcyd-kb（e5fe283d）/ KV COUNTERS（fbe64aca）/ Vectorize kcyd-kb（1536维，智谱MRL截断）/ R2 kcyd-media（待控制台开通后加回 wrangler.toml 注释的 MEDIA 绑定）
+- **媒体存储：阿里云 OSS**（不是 R2）：桶 `kuchuang-yide` @ oss-ap-southeast-1（新加坡，海外友好），桶公共读；Workers `src/oss.js` 签发 PostObject 直传凭证，浏览器直传不经 Workers；凭证 OSS_ACCESS_KEY_ID/SECRET 走 wrangler secrets（源在 ~/.claude/credentials.env）
 - 生产调试要点：GLM 调用必须 thinking disabled（思考链会耗尽 max_tokens 致 content 空）；CF 边缘→智谱北京往返慢，超时 30s；curl 测试要带浏览器 UA（CF bot 防护挡默认 UA）
 - D1/R2/KV 的 PLACEHOLDER ID 创建资源后填回 wrangler.toml
 

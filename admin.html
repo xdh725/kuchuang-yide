@@ -43,7 +43,7 @@ textarea { min-height: 110px; resize: vertical; }
   <div id="login-box" class="panel">
     <h3>知识库管理登录</h3>
     <label>管理员密码</label>
-    <input type="text" id="pw" type="password">
+    <input type="password" id="pw" autocomplete="current-password">
     <div style="margin-top:14px"><button class="btn" onclick="doLogin()">登录</button></div>
   </div>
 
@@ -170,10 +170,20 @@ async function saveEntry() {
   let media = null;
   const f = $('f-media').files[0];
   if (f) {
-    const fd = new FormData(); fd.append('file', f);
-    const up = await api('upload', { method: 'POST', body: fd });
-    if (!up.ok) return toast('上传失败: ' + up.error, false);
-    media = up.key; toast('媒体已上传 ' + media);
+    // ① 取 OSS 直传签名 ② 浏览器直传阿里云 ③ 记录 key
+    const sig = await api('upload-sign?content_type=' + encodeURIComponent(f.type || ''));
+    if (!sig.ok) return toast('签名失败: ' + sig.error, false);
+    const key = sig.keyPrefix + Date.now() + '-' + f.name.replace(/[^\w.-]/g, '_');
+    const fd = new FormData();
+    fd.append('key', key);
+    fd.append('policy', sig.policy);
+    fd.append('OSSAccessKeyId', sig.accessKeyId);
+    fd.append('signature', sig.signature);
+    if (f.type) fd.append('Content-Type', f.type);
+    fd.append('file', f);
+    const oss = await fetch(sig.host, { method: 'POST', body: fd });
+    if (!oss.ok) return toast('OSS 上传失败: ' + oss.status, false);
+    media = key; toast('已上传 OSS: ' + key);
   }
   const body = {
     id: $('f-id').value.trim(), title: $('f-title').value.trim(),

@@ -37,6 +37,8 @@ KB_THRESHOLD = "0.42"      # 初值，黄金集校准后覆盖（docs/ai-guide-i
 TOP_K = "5"
 DAILY_CHAT_CAP = "5000"
 GATE_ENABLED = "true"      # 黄金集命中率≥80% 才放行 AI；false=强制全兜底（上线前开关）
+OSS_BUCKET = "kuchuang-yide"     # 阿里云 OSS 独立桶（新加坡，海外访问友好，桶公共读）
+OSS_REGION = "oss-ap-southeast-1"
 
 # secrets（wrangler secret put）：
 # ZHIPU_API_KEY / FEISHU_WEBHOOK / TURNSTILE_SECRET / ADMIN_PASSWORD

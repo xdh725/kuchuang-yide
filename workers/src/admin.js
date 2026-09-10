@@ -1,5 +1,6 @@
-// /api/admin/*：素材 CRUD（D1）、媒体上传（R2）、重建索引（embedding→Vectorize）、黄金集、健康报告
+// /api/admin/*：素材 CRUD（D1）、媒体上传（OSS直传签名）、重建索引（embedding→Vectorize）、黄金集、健康报告
 import { embed } from './llm.js';
+import { signUpload } from './oss.js';
 
 const J = (obj, status = 200, extra = {}) =>
   new Response(JSON.stringify(obj), {
@@ -42,18 +43,11 @@ export async function handleAdmin(request, env, url) {
     return J({ ok: true });
   }
 
-  // ── 媒体上传：浏览器直传 R2 ──
-  if (sub === 'upload' && request.method === 'POST') {
-    const form = await request.formData();
-    const file = form.get('file');
-    if (!file || !(file instanceof File)) return J({ ok: false, error: 'no file' }, 400);
-    if (file.size > 100 * 1024 * 1024) return J({ ok: false, error: '文件超过 100MB' }, 400);
-    const safe = file.name.replace(/[^\w.-]/g, '_');
-    const key = 'kb/' + Date.now() + '-' + safe;
-    await env.MEDIA.put(key, file.stream(), {
-      httpMetadata: { contentType: file.type || 'application/octet-stream' },
-    });
-    return J({ ok: true, key });
+  // ── 媒体上传：签发 OSS PostObject 直传凭证（浏览器直传阿里云，文件不过 Workers）──
+  if (sub === 'upload-sign' && request.method === 'GET') {
+    const ct = url.searchParams.get('content_type') || '';
+    const sig = await signUpload(env, ct);
+    return J({ ok: true, ...sig });
   }
 
   // ── 重建索引：D1 verified 素材 → 智谱 embedding → Vectorize upsert ──

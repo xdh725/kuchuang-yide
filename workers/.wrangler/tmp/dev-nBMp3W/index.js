@@ -123,10 +123,10 @@ var init_ratelimit = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-DtPkOq/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-XRqs4U/middleware-loader.entry.ts
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-DtPkOq/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-XRqs4U/middleware-insertion-facade.js
 init_modules_watch_stub();
 
 // src/index.js
@@ -340,6 +340,60 @@ __name(corsPreflight, "corsPreflight");
 // src/admin.js
 init_modules_watch_stub();
 init_llm();
+
+// src/oss.js
+init_modules_watch_stub();
+function b64(str) {
+  return btoa(String.fromCharCode(...new Uint8Array(new TextEncoder().encode(str))));
+}
+__name(b64, "b64");
+function b64bytes(bytes) {
+  return btoa(String.fromCharCode(...new Uint8Array(bytes)));
+}
+__name(b64bytes, "b64bytes");
+async function hmacSha1(key, msg) {
+  const c = await crypto.subtle.importKey(
+    "raw",
+    key,
+    { name: "HMAC", hash: "SHA-1" },
+    false,
+    ["sign"]
+  );
+  return new Uint8Array(await crypto.subtle.sign("HMAC", c, new TextEncoder().encode(msg)));
+}
+__name(hmacSha1, "hmacSha1");
+async function signUpload(env, contentType, sizeLimit = 100 * 1024 * 1024) {
+  const bucket = env.OSS_BUCKET;
+  const region = env.OSS_REGION;
+  const dir = "kb/";
+  const expire = new Date(Date.now() + 10 * 60 * 1e3).toISOString();
+  const policy = {
+    expiration: expire,
+    conditions: [
+      { bucket },
+      ["starts-with", "$key", dir],
+      ["content-length-range", 1, sizeLimit],
+      ...contentType ? [{ "Content-Type": contentType }] : []
+    ]
+  };
+  const policyB64 = b64(JSON.stringify(policy));
+  const sig = b64bytes(await hmacSha1(
+    new TextEncoder().encode(env.OSS_ACCESS_KEY_SECRET),
+    policyB64
+  ));
+  return {
+    host: `https://${bucket}.${region}.aliyuncs.com`,
+    keyPrefix: dir,
+    policy: policyB64,
+    signature: sig,
+    accessKeyId: env.OSS_ACCESS_KEY_ID,
+    expireAt: expire
+    // 上传后的公开访问 URL 前端拼：host/key（桶公共读或绑定域名）
+  };
+}
+__name(signUpload, "signUpload");
+
+// src/admin.js
 var J = /* @__PURE__ */ __name((obj, status = 200, extra = {}) => new Response(JSON.stringify(obj), {
   status,
   headers: { "Content-Type": "application/json", ...extra }
@@ -381,17 +435,10 @@ async function handleAdmin(request, env, url) {
     await env.DB.prepare("DELETE FROM entries WHERE id=?").bind(id).run();
     return J({ ok: true });
   }
-  if (sub === "upload" && request.method === "POST") {
-    const form = await request.formData();
-    const file = form.get("file");
-    if (!file || !(file instanceof File)) return J({ ok: false, error: "no file" }, 400);
-    if (file.size > 100 * 1024 * 1024) return J({ ok: false, error: "\u6587\u4EF6\u8D85\u8FC7 100MB" }, 400);
-    const safe = file.name.replace(/[^\w.-]/g, "_");
-    const key = "kb/" + Date.now() + "-" + safe;
-    await env.MEDIA.put(key, file.stream(), {
-      httpMetadata: { contentType: file.type || "application/octet-stream" }
-    });
-    return J({ ok: true, key });
+  if (sub === "upload-sign" && request.method === "GET") {
+    const ct = url.searchParams.get("content_type") || "";
+    const sig = await signUpload(env, ct);
+    return J({ ok: true, ...sig });
   }
   if (sub === "rebuild" && request.method === "POST") {
     const rows = await env.DB.prepare("SELECT * FROM entries WHERE verified=1").all();
@@ -599,7 +646,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-DtPkOq/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-XRqs4U/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -632,7 +679,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-DtPkOq/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-XRqs4U/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
