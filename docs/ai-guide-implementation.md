@@ -10,7 +10,7 @@ knowledge-base/*.md（双语条目）                浏览器 chat.js
         │                                          │ POST /api/chat {message, lang}
         ▼                                          ▼
 scripts/build-kb.mjs                        workers/api/chat.js（入口）
-  解析 frontmatter → 分块                    ① embed(text)  ← OpenAI text-embedding-3-small
+  解析 frontmatter → 分块                    ① embed(text)  ← 智谱 embedding-3
   OpenAI embedding 预计算                     ② Vectorize query top-5
         │                                    ③ score < THRESHOLD？──是──▶ 兜底 {fallback:true}
         ▼                                    ④ Harness: system prompt(harness) +
@@ -87,12 +87,12 @@ ZH: KC-4215 外转子无刷电机：KV 340，额定电压 48V（12S 锂电），
  1. 解析 frontmatter（gray-matter 或手写 YAML 子集解析，避免依赖）
  2. 校验：verified=true 才入库；id 唯一性检查；EN/ZH 字段存在
  3. embedText = title + "\n" + EN段 + "\n" + ZH段   ← 双语同向量，中英提问都能命中
- 4. 调 OpenAI embeddings API（text-embedding-3-small, 1536维, batch≤100条/次）
+ 4. 调智谱 embeddings API（embedding-3, 2048维, batch≤64条/次）
  5. 生成 vectors.json（wrangler vectorize insert 命令格式）
  6. 同时导出 kb-manifest.json：[{id, title, tags, source_label}]
     → 后置校验的型号/牌号白名单也从这里生成
 运行：
-  OPENAI_API_KEY=... node scripts/build-kb.mjs
+  source ~/.claude/credentials.env && ZHIPU_API_KEY=$ZHIPU_API_KEY node scripts/build-kb.mjs
   wrangler vectorize insert kcyd-kb --file=vectors.json --binding=KB
 成本：40 条 ≈ 3万 token ≈ $0.001（一次性）
 ```
@@ -115,13 +115,12 @@ name = "kuchuang-yide"
 compatibility_date = "2026-09-01"
 main = "src/index.js"
 
-[ai]
-binding = "AI"                              # Harness 生成用 Workers AI
+# （无 [ai] binding——生成走智谱 API，见 src/llm.js 封装）
 
 [[vectorize_indexes]]
 binding = "KB"
 index_name = "kcyd-kb"
-dimensions = 1536
+dimensions = 2048          # 智谱 embedding-3 输出维度
 metric = "cosine"
 
 [[kv_namespaces]]
@@ -136,19 +135,24 @@ type = "ratelimit"
   simple = { limit = 20, period = 3600 }    # 20 次/小时/IP
 
 [vars]
-CHAT_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"   # Workers AI
-FILTER_MODEL = "@cf/meta/llama-3.1-8b-instruct-fast"      # 后置校验（便宜快）
-KB_THRESHOLD = "0.42"                        # ⚠️ 初值，黄金集校准后覆盖（见§6）
+ZHIPU_BASE = "https://open.bigmodel.cn/api/paas/v4"
+CHAT_MODEL = "glm-4.6"          # Harness 转述主力
+FILTER_MODEL = "glm-4.5-air"    # 后置校验（便宜快）
+EMBED_MODEL = "embedding-3"     # 多语 embedding，2048 维
+KB_THRESHOLD = "0.42"           # ⚠️ 初值，黄金集校准后覆盖（见§6）
 TOP_K = "5"
 
 # secrets（wrangler secret put，不入库）：
-# OPENAI_API_KEY / FEISHU_WEBHOOK / TURNSTILE_SECRET
+# ZHIPU_API_KEY / FEISHU_WEBHOOK / TURNSTILE_SECRET
 ```
 
-LLM 选型说明（MVP 默认，可换）：
-- **生成**：Workers AI `llama-3.3-70b`——边缘就近推理（亚特兰大/法兰克福/新加坡 PoP），无跨大区往返，转述任务质量足够；成本含在 Workers 付费计划
-- **备选**：若转述质量不达标（黄金集人工评分 <4/5），切 OpenAI `gpt-4o-mini`（Workers 内 fetch 调用，延迟 +300-600ms 但质量更稳）。切换只改一个 fetch 封装
-- **embedding 固定 OpenAI**：多语种质量是硬需求（D10 决策），CF 无等价模型
+LLM 选型（已定：全栈智谱 GLM，2026-09-10 用户决策）：
+- **生成**：`glm-4.6`——转述主力，中文理解强于 llama-70b（双语站加分）
+- **校验**：`glm-4.5-air`——后置校验专用，便宜且快
+- **embedding**：`embedding-3`——智谱多语模型（2048 维），中英双语检索原生支持，双语拼一条向量的策略不变
+- **统一封装**：`src/llm.js` 一个 fetch 封装管 chat/embedding 两类调用（OpenAI 兼容协议），换模型只改 env 变量
+- **延迟注记**：GLM 无边缘推理，Workers（海外 PoP）→ 北京往返约 +300-800ms。管线总延迟预算仍按 E2E ≤8s 设计（弱网 3G 实测为准）
+- **前置条件**：智谱账户需充值（2026-09-10 实测余额为 0，全部模型报 1113）
 
 ## 4. 聊天管线 `workers/src/chat.js`（核心，逐环节实现）
 
@@ -171,7 +175,7 @@ export async function handleChat(request, env, ctx) {
                                                   //（提示语:工程师会看图回复，请留联系方式）
 
   // ── 2. 查询 embedding（外部调用 1/2）──────────
-  const qvec = await embedQuery(env, message);    // OpenAI, ~120ms
+  const qvec = await embedQuery(env, message);    // 智谱 embedding-3, ~200ms
 
   // ── 3. 检索 ───────────────────────────────────
   const hits = await env.KB.query(qvec, { topK: 5, returnMetadata: 'all' });
@@ -202,9 +206,9 @@ export async function handleChat(request, env, ctx) {
 
 | 环节 | 实现 | 失败路径 |
 |------|------|----------|
-| embedQuery | fetch OpenAI，10s AbortController 超时 | 失败→兜底（记 error 埋点），绝不 500 |
+| embedQuery | fetch 智谱 embeddings，10s AbortController 超时 | 失败→兜底（记 error 埋点），绝不 500 |
 | KB.query | Vectorize 绑定调用，<50ms | 异常→兜底 |
-| runHarness | prompts/harness-system-prompt.md 作 system；片段+问题作 user；Workers AI `AI.run(CHAT_MODEL)`；**temperature 0.2**；输出追加来源由后端拼（不靠模型自觉） | 超时 15s→兜底；空回复→兜底 |
+| runHarness | prompts/harness-system-prompt.md 作 system；片段+问题作 user；`src/llm.js` 调智谱 chat/completions（CHAT_MODEL）；**temperature 0.2**；输出追加来源由后端拼（不靠模型自觉） | 超时 15s→兜底；空回复→兜底 |
 | postFilter | ①正则预检（post-filter-prompt.md 的 4 条，引用原文豁免：strip `[KB-xx]` 标记后再匹配）②FILTER_MODEL 按 post-filter-prompt.md 输出 JSON {verdict, violations} ③解析失败按 FAIL（宁严勿松） | 任何异常→FAIL→兜底 |
 | fallback | 双语固定话术（i18n 键已有 chat.fallback），带询盘 CTA；前端已渲染 | — |
 | 埋点 | 全部异步 `ctx.waitUntil(insertD1(...))`，只存：{ts, lang, score, top_id, fallback:bool, filter:pass/blocked, duration_ms}——**不存消息全文** | 埋点失败不影响主流程 |
@@ -261,15 +265,15 @@ gate 规则（v2 已定）：**命中率 ≥80% 才放行 AI 入口**；未达�
 # 一次性
 cd workers && npm install
 npx wrangler login
-npx wrangler vectorize create kcyd-kb --dimensions=1536 --metric=cosine
+npx wrangler vectorize create kcyd-kb --dimensions=2048 --metric=cosine
 npx wrangler kv namespace create COUNTERS
-npx wrangler secret put OPENAI_API_KEY
+npx wrangler secret put ZHIPU_API_KEY
 
 # 素材入库
-OPENAI_API_KEY=... node ../scripts/build-kb.mjs
+source ~/.claude/credentials.env && node ../scripts/build-kb.mjs
 npx wrangler vectorize insert kcyd-kb --file=vectors.json
 
-# 本地开发（miniflare 模拟 AI/Vectorize/KV，embedding 走真实 OpenAI）
+# 本地开发（miniflare 模拟 Vectorize/KV，LLM+embedding 走真实智谱 API）
 npx wrangler dev          # http://localhost:8787
 # 前端联调：python3 -m http.server 8765 + chat.js 的 RAG_ENDPOINT
 #   改为绝对 http://localhost:8787/api/chat（加 CORS）
@@ -286,7 +290,7 @@ CORS（index.js 统一处理）：`Access-Control-Allow-Origin` 只回 GitHub Pa
 | 测试 | 类型 | 验证 |
 |------|------|------|
 | build-kb 解析/校验 | 单元 | 素材 verified=false 被拒；id 重复报错 |
-| 管线各环节 | 单元 | mock AI/KB/RL，断言 fallback 分支、超时分支 |
+| 管线各环节 | 单元 | mock llm.js/KB/RL，断言 fallback 分支、超时分支 |
 | 正则预检 | 单元 | "efficiency of 91%" 拦截；"[KB-MD-001] ... 91% ..."（引用）豁免 |
 | 黄金集 | 集成 | 真实 embedding+Vectorize，命中率报告 |
 | 后置校验 FP | 集成 | 黄金集答案过校验，误拦 <5% |
@@ -296,7 +300,7 @@ CORS（index.js 统一处理）：`Access-Control-Allow-Origin` 只回 GitHub Pa
 ## 9. 已知取舍（写明白，不藏着）
 
 1. **无会话**：单轮问答。追问体验靠"递进引导"话术补偿（Harness 提示词已含）
-2. **生成模型可能换**：若 70B 转述质量不达标切 gpt-4o-mini，接口封装已隔离
+2. **模型可换**：全栈智谱（glm-4.6 主力），llm.js 封装隔离——质量/成本不达标时只改 env 变量即可切任何 OpenAI 兼容模型
 3. **阈值是数据驱动**：初值 0.42 是经验值，以黄金集 sweep 结果为准
 4. **图片=兜底**：阶段一无视觉模型，带图提问引导询盘（工程师人肉看图回复，反而最可信）
 5. **workers.dev 免费域**：MVP 够用；正式推广前按 tech-plan-v2 第 0 批迁自有域
