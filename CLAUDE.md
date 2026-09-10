@@ -16,6 +16,20 @@ assets/     前端静态资源（css / js / img / video）
 *.html      网站四个页面：index / product-explorer / virtual-tour / thank-you
 ```
 
+## 多语言（i18n）
+
+- 零依赖实现：`assets/js/i18n.js`（语言包字典 + localStorage 持久化 + 浏览器语言自动检测）
+- 页面文案用 `data-i18n` / `data-i18n-html` / `data-i18n-placeholder` 标记；JS 动态文案用 `I18N.t('key')`
+- 当前支持 EN（默认）/ 中文；**新增语言**：在 `i18n.js` 的 `DICT` 加语言块 + 四个页面 `<select id="lang-select">` 加 `<option>`
+- 切换后 dispatch `langchange` 事件；chat 请求自动携带 `lang` 字段（后端按语言返回）
+
+## 预览部署
+
+- **GitHub Pages**：https://xdh725.github.io/kuchuang-yide/ （仓库 xdh725/kuchuang-yide，master 分支即线上）
+- **正式部署目标仍是 Cloudflare Pages + R2**（见 `docs/deployment.md`；GitHub Pages 仅预览用）
+- 注意：GitHub Pages CDN 对 HTML/JS 缓存 max-age=600，部署新版本后浏览器最多延迟 10 分钟
+
+
 ## 核心原则（写代码前必读）
 
 1. **幻觉零容忍**：AI 只能转述/串联知识库素材，禁止生成库中不存在的参数、型号、材料牌号。详见 `docs/architecture-router-harness-agent.md`。

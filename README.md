@@ -48,6 +48,14 @@ Router 调度器（总闸门）
 2. **阶段二**：加 Router + 受控 Agent（关闭联网），复杂场景问题放行
 3. **阶段三**：高频复杂问题固化回知识库，从 Agent 领地迁回 Harness 领地（闭环迭代）
 
+## 多语言
+
+🇬🇧 English（默认）/ 🇨🇳 中文，右上角 🌐 即时切换；按浏览器语言自动检测，localStorage 记忆选择。零依赖实现，扩展新语言只需在 `assets/js/i18n.js` 加语言包。
+
+## 在线预览
+
+https://xdh725.github.io/kuchuang-yide/ （GitHub Pages；正式部署迁移到 Cloudflare Pages + R2，见 `docs/deployment.md`）
+
 ## 技术栈
 
 纯静态 HTML/CSS/JS（无框架、无构建）+ Cloudflare Pages 零服务器部署 + RAG 知识库 API（火山方舟 / OpenAI 兼容接口）+ Cloudflare R2 海外对象存储。
