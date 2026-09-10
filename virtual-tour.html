@@ -4,25 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Virtual Factory Tour — KUCHUANG YIDE</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/lang.css">
 </head>
 <body>
 
 <header class="site-header">
   <div class="wrap">
     <div class="logo"><a href="index.html">KUCHUANG <span>YIDE</span></a></div>
-    <div class="header-note">Low-bandwidth video · plays smoothly on weak networks</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="header-note" data-i18n="header.note.tour">Low-bandwidth video · plays smoothly on weak networks</span>
+      <span class="lang-switch">
+        <label for="lang-select">🌐</label>
+        <select id="lang-select" aria-label="Language">
+          <option value="en">EN</option>
+          <option value="zh">中文</option>
+        </select>
+      </span>
+    </div>
   </div>
 </header>
 
 <main class="wrap">
   <section class="page-bar">
-    <h1>🏭 Virtual Factory Tour</h1>
-    <p>Click a station to watch. Videos are kept small on purpose — clarity yields to smoothness, so they play even on unstable connections.</p>
+    <h1 data-i18n="tour.title">🏭 Virtual Factory Tour</h1>
+    <p data-i18n="tour.sub">Click a station to watch. Videos are kept small on purpose — clarity yields to smoothness, so they play even on unstable connections.</p>
   </section>
 
   <div class="snapshot-note">
-    📅 <b>Today's workshop snapshot</b> — fresh footage is recorded every day.
+    <span data-i18n="tour.snapshot">📅 Today's workshop snapshot — fresh footage is recorded every day.</span>
     <span id="snapshot-date"></span>
   </div>
 
@@ -35,28 +46,27 @@
   </div>
 
   <div class="book-cta">
-    Want a <b>live guided tour</b> with our engineer walking the floor
-    and answering your questions in real time?
+    <span data-i18n-html="tour.book.title">Want a <b>live guided tour</b> with our engineer walking the floor and answering your questions in real time?</span>
     <br>
-    <button class="btn" type="button" onclick="openInquiry()">📞 Book a LIVE guided tour</button>
-    <p style="margin-top:10px">Leave your preferred time, time zone and WhatsApp — we will confirm a slot.</p>
+    <button class="btn" type="button" onclick="openInquiry()" data-i18n="tour.book.btn">📞 Book a LIVE guided tour</button>
+    <p style="margin-top:10px" data-i18n="tour.book.sub">Leave your preferred time, time zone and WhatsApp — we will confirm a slot.</p>
   </div>
 </main>
 
 <div class="modal-mask" id="inquiry-mask">
   <div class="modal">
-    <h3>Book a LIVE guided tour</h3>
-    <p class="hint">Three fields only. We reply within one working day.</p>
+    <h3 data-i18n="inquiry.title.book">Book a LIVE guided tour</h3>
+    <p class="hint" data-i18n="inquiry.hint">Three fields only. We reply within one working day.</p>
     <form id="inquiry-form">
-      <label for="in-name">Name</label>
+      <label for="in-name" data-i18n="inquiry.name">Name</label>
       <input id="in-name" name="name" required>
-      <label for="in-company">Company</label>
+      <label for="in-company" data-i18n="inquiry.company">Company</label>
       <input id="in-company" name="company" required>
-      <label for="in-contact">Email / WhatsApp + preferred time &amp; time zone</label>
+      <label for="in-contact" data-i18n="inquiry.contact.book">Email / WhatsApp + preferred time &amp; time zone</label>
       <input id="in-contact" name="contact" required>
       <div class="actions">
-        <button class="btn ghost" type="button" id="inquiry-close">Cancel</button>
-        <button class="btn" type="submit" id="inquiry-submit">Book</button>
+        <button class="btn ghost" type="button" id="inquiry-close" data-i18n="inquiry.cancel">Cancel</button>
+        <button class="btn" type="submit" id="inquiry-submit" data-i18n="inquiry.book">Book</button>
       </div>
     </form>
   </div>
@@ -65,27 +75,37 @@
 <footer class="site-footer">
   <div class="wrap cols">
     <div>
-      <h4>Contact</h4>
+      <h4 data-i18n="footer.contact">Contact</h4>
       <ul>
-        <li>Email: sales@kuchuangyide.com</li>
-        <li>WhatsApp: +86-xxx-xxxx-xxxx</li>
+        <li data-i18n="footer.email">Email: sales@kuchuangyide.com</li>
+        <li data-i18n="footer.whatsapp">WhatsApp: +86-xxx-xxxx-xxxx</li>
       </ul>
     </div>
     <div>
-      <h4>Why the video looks soft</h4>
+      <h4 data-i18n="footer.whysoft">Why the video looks soft</h4>
       <ul>
-        <li>360–720p, under 900 kbps, on purpose</li>
-        <li>Smooth beats sharp on weak networks</li>
+        <li data-i18n="footer.soft1">360–720p, under 900 kbps, on purpose</li>
+        <li data-i18n="footer.soft2">Smooth beats sharp on weak networks</li>
       </ul>
     </div>
   </div>
 </footer>
 
+<script src="assets/js/i18n.js"></script>
 <script src="assets/js/inquiry.js"></script>
 <script src="assets/js/tour.js"></script>
 <script>
+  document.getElementById('lang-select').addEventListener('change', function () {
+    I18N.set(this.value);
+  });
   document.getElementById('snapshot-date').textContent =
-    new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    new Date().toLocaleDateString(I18N.lang === 'zh' ? 'zh-CN' : 'en-US',
+      { month: 'short', day: 'numeric', year: 'numeric' });
+  document.addEventListener('langchange', function (e) {
+    document.getElementById('snapshot-date').textContent =
+      new Date().toLocaleDateString(e.detail.lang === 'zh' ? 'zh-CN' : 'en-US',
+        { month: 'short', day: 'numeric', year: 'numeric' });
+  });
 </script>
 
 </body>

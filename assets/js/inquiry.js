@@ -24,7 +24,7 @@
     e.preventDefault();
     var btn = document.getElementById('inquiry-submit');
     btn.disabled = true;
-    btn.textContent = 'Sending…';
+    btn.textContent = I18N.t('inquiry.sending');
 
     var body = JSON.stringify({
       name: form.name.value.trim(),
@@ -50,7 +50,7 @@
             'Contact: ' + form.contact.value + '\n'
           );
         btn.disabled = false;
-        btn.textContent = 'Send';
+        btn.textContent = I18N.t('inquiry.send');
       });
   };
 })();

@@ -2,7 +2,8 @@
    Talks to a thin backend endpoint that implements the
    Router -> Harness / controlled Agent -> post-filter pipeline.
    The endpoint URL is configured in RAG_ENDPOINT below (Cloudflare
-   Pages Function /api/chat — keys stay server-side, never here). */
+   Pages Function /api/chat — keys stay server-side, never here).
+   All user-facing strings come from i18n.js (I18N.t). */
 
 (function () {
   'use strict';
@@ -17,14 +18,7 @@
   var fileInput = document.getElementById('chat-file');
   var attachPreview = document.getElementById('attach-preview');
   var pendingImage = null;
-
-  var WELCOME =
-    'Hello! You can ask me anything about our BLDC motors, ' +
-    'performance, raw materials, processes and application cases.';
-
-  var FALLBACK =
-    'This specific information is not available in our product database. ' +
-    'Please leave your WhatsApp or email; our engineer will send you verified data.';
+  var welcomeNode = null;
 
   function el(tag, cls, text) {
     var n = document.createElement(tag);
@@ -62,13 +56,11 @@
 
   function inquiryCTA() {
     var m = el('div', 'msg bot fallback');
-    m.textContent =
-      'If you need custom specifications or a sample offer, please leave ' +
-      'your WhatsApp / Email — our engineer will contact you.';
+    m.textContent = I18N.t('chat.cta');
     var b = el('button', 'btn ghost');
     b.type = 'button';
     b.style.marginTop = '8px';
-    b.textContent = 'Leave contact';
+    b.textContent = I18N.t('chat.cta.btn');
     b.onclick = function () { openInquiry(); };
     m.appendChild(b);
     log.appendChild(m);
@@ -84,7 +76,7 @@
 
     var typing = addTyping();
 
-    var payload = { message: text.trim() };
+    var payload = { message: text.trim(), lang: I18N.lang };
     if (img) payload.image = img.dataUrl;
 
     fetch(RAG_ENDPOINT, {
@@ -97,7 +89,7 @@
         log.removeChild(typing);
         // data: { reply, source, fallback }
         if (data.fallback) {
-          addMsg('bot', FALLBACK, { fallback: true });
+          addMsg('bot', I18N.t('chat.fallback'), { fallback: true });
           inquiryCTA();
         } else {
           addMsg('bot', data.reply, { source: data.source });
@@ -106,11 +98,7 @@
       .catch(function () {
         log.removeChild(typing);
         // Endpoint not deployed yet (phase 1 wiring) — honest offline reply.
-        addMsg(
-          'bot',
-          'The assistant service is not connected yet. ' + FALLBACK,
-          { fallback: true }
-        );
+        addMsg('bot', I18N.t('chat.offline') + I18N.t('chat.fallback'), { fallback: true });
         inquiryCTA();
       });
   }
@@ -121,7 +109,7 @@
     var f = fileInput.files && fileInput.files[0];
     if (!f) return;
     if (f.size > 3 * 1024 * 1024) {
-      alert('Please attach an image under 3 MB.');
+      alert(I18N.t('chat.attach.toobig'));
       return;
     }
     var fr = new FileReader();
@@ -133,7 +121,7 @@
       im.alt = f.name;
       attachPreview.appendChild(im);
       attachPreview.appendChild(
-        el('span', null, f.name + ' — will be analyzed for a suggestive match only')
+        el('span', null, f.name + I18N.t('chat.attach.note'))
       );
     };
     fr.readAsDataURL(f);
@@ -149,5 +137,12 @@
     if (e.key === 'Enter') { e.preventDefault(); send(input.value); }
   });
 
-  addMsg('bot', WELCOME);
+  // Welcome message follows the active language (also after a switch,
+  // as long as the conversation has not started yet).
+  welcomeNode = addMsg('bot', I18N.t('chat.welcome'));
+  document.addEventListener('langchange', function () {
+    if (log.children.length === 1 && log.children[0] === welcomeNode) {
+      welcomeNode.textContent = I18N.t('chat.welcome');
+    }
+  });
 })();

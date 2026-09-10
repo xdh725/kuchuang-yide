@@ -1,5 +1,6 @@
 /* Virtual tour: one low-bitrate pre-recorded clip per station (Plan A).
-   Videos are HLS/MP4 on Cloudflare R2 behind CDN. Audio off by default. */
+   Videos are HLS/MP4 on Cloudflare R2 behind CDN. Audio off by default.
+   Station labels/notes are localized via i18n.js keys st.<key> / st.<key>.note */
 
 (function () {
   'use strict';
@@ -7,35 +8,30 @@
   // Phase 1 placeholder paths — replace with real R2/CDN URLs after
   // encoding per docs/video-encoding-guide.md (720p / 500-700kbps / 15fps).
   var STATIONS = [
-    { key: 'warehouse', emoji: '📦', label: 'Raw Material Warehouse',
-      video: 'assets/video/tour-warehouse.mp4',
-      note: 'Incoming inspection for silicon steel, magnets and bearings.' },
-    { key: 'winding', emoji: '🧵', label: 'Winding Station',
-      video: 'assets/video/tour-winding.mp4',
-      note: 'Automatic winding with tension control and turn-count check.' },
-    { key: 'inspection', emoji: '🔍', label: 'Visual Inspection',
-      video: 'assets/video/tour-inspection.mp4',
-      note: 'CCD 2D vision inspection on stator and winding geometry.' },
-    { key: 'burnin', emoji: '🔥', label: 'Burn-in Test',
-      video: 'assets/video/tour-burnin.mp4',
-      note: 'Every batch runs a full burn-in before release.' },
-    { key: 'packing', emoji: '📦', label: 'Packing Area',
-      video: 'assets/video/tour-packing.mp4',
-      note: 'Export-grade packing with moisture protection.' }
+    { key: 'warehouse', emoji: '📦', video: 'assets/video/tour-warehouse.mp4' },
+    { key: 'winding', emoji: '🧵', video: 'assets/video/tour-winding.mp4' },
+    { key: 'inspection', emoji: '🔍', video: 'assets/video/tour-inspection.mp4' },
+    { key: 'burnin', emoji: '🔥', video: 'assets/video/tour-burnin.mp4' },
+    { key: 'packing', emoji: '📦', video: 'assets/video/tour-packing.mp4' }
   ];
 
   var grid = document.getElementById('tour-grid');
   var player = document.getElementById('tour-player');
   var note = document.getElementById('tour-note');
   var title = document.getElementById('tour-title');
+  var current = 0;
+
+  function stationLabel(st) { return st.emoji + ' ' + I18N.t('st.' + st.key); }
 
   function activate(i) {
+    current = i;
     var st = STATIONS[i];
     Array.prototype.forEach.call(grid.children, function (b, j) {
       b.classList.toggle('active', i === j);
+      b.lastChild.textContent = I18N.t('st.' + STATIONS[j].key);
     });
-    title.textContent = st.emoji + ' ' + st.label;
-    note.textContent = st.note;
+    title.textContent = stationLabel(st);
+    note.textContent = I18N.t('st.' + st.key + '.note');
     player.innerHTML = '';
     var v = document.createElement('video');
     v.controls = true;
@@ -47,9 +43,7 @@
     src.type = 'video/mp4';
     v.appendChild(src);
     v.addEventListener('error', function () {
-      note.textContent =
-        'This station clip is being uploaded. Please leave your contact — ' +
-        'we will send you the footage.';
+      note.textContent = I18N.t('tour.video.missing');
     });
     player.appendChild(v);
     v.play().catch(function () { /* autoplay blocked: user presses play */ });
@@ -63,7 +57,7 @@
     e.className = 'emoji';
     e.textContent = st.emoji;
     var l = document.createElement('span');
-    l.textContent = st.label;
+    l.textContent = I18N.t('st.' + st.key);
     b.appendChild(e);
     b.appendChild(l);
     b.onclick = function () { activate(i); };
@@ -71,4 +65,19 @@
   });
 
   activate(0);
+  document.addEventListener('langchange', function () {
+    // relabel buttons + current title/note without reloading the video
+    Array.prototype.forEach.call(grid.children, function (btn, j) {
+      btn.lastChild.textContent = I18N.t('st.' + STATIONS[j].key);
+    });
+    title.textContent = stationLabel(STATIONS[current]);
+    if (note.textContent === I18N.t('tour.video.missing') ||
+        note.textContent !== I18N.t('tour.video.missing')) {
+      // keep showing the missing-clip notice if the video failed earlier
+      note.textContent = player.querySelector('video') &&
+        player.querySelector('video').error
+        ? I18N.t('tour.video.missing')
+        : I18N.t('st.' + STATIONS[current].key + '.note');
+    }
+  });
 })();

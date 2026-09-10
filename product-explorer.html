@@ -4,21 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Product Explorer — KUCHUANG YIDE BLDC Motors</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/lang.css">
 </head>
 <body>
 
 <header class="site-header">
   <div class="wrap">
     <div class="logo"><a href="index.html">KUCHUANG <span>YIDE</span></a></div>
-    <div class="header-note">AI Product Guide · answers only from our verified database</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="header-note" data-i18n="header.note.explorer">AI Product Guide · answers only from our verified database</span>
+      <span class="lang-switch">
+        <label for="lang-select">🌐</label>
+        <select id="lang-select" aria-label="Language">
+          <option value="en">EN</option>
+          <option value="zh">中文</option>
+        </select>
+      </span>
+    </div>
   </div>
 </header>
 
 <main class="wrap">
   <section class="page-bar">
-    <h1>🤖 Product Explorer</h1>
-    <p>Ask anything about our BLDC motors — performance, materials, processes, application cases. The guide answers layer by layer, with sources.</p>
+    <h1 data-i18n="explorer.title">🤖 Product Explorer</h1>
+    <p data-i18n="explorer.sub">Ask anything about our BLDC motors — performance, materials, processes, application cases. The guide answers layer by layer, with sources.</p>
   </section>
 
   <!-- Layer 1: muted autoplay overview video (45–90s, H.264 720p, no scrub bar) -->
@@ -32,6 +43,7 @@
       preload="metadata"
       controlslist="nodownload noplaybackrate"
       src="assets/video/product-overview.mp4"
+      onerror="this.parentElement.style.display='none'"
     ></video>
   </section>
 
@@ -40,31 +52,31 @@
     <div class="chat-log" id="chat-log"></div>
     <div class="chat-attach" id="attach-preview"></div>
     <div class="chat-input-row">
-      <button class="btn ghost" id="chat-attach-btn" type="button" title="Attach a photo of your current motor / equipment">📎</button>
+      <button class="btn ghost" id="chat-attach-btn" type="button" data-i18n-title-marker title="Attach a photo of your current motor / equipment">📎</button>
       <input type="file" id="chat-file" accept="image/*">
       <input class="chat-input" id="chat-input" type="text"
-             placeholder="e.g. What magnet grade do you use?" autocomplete="off">
-      <button class="btn" id="chat-send" type="button">Send</button>
+             placeholder="e.g. What magnet grade do you use?" data-i18n-placeholder="explorer.placeholder" autocomplete="off">
+      <button class="btn" id="chat-send" type="button" data-i18n="explorer.send">Send</button>
     </div>
   </section>
 </main>
 
-<button class="btn inquiry-fab" type="button" onclick="openInquiry()">💬 Inquiry</button>
+<button class="btn inquiry-fab" type="button" onclick="openInquiry()" data-i18n="inquiry.fab">💬 Inquiry</button>
 
 <div class="modal-mask" id="inquiry-mask">
   <div class="modal">
-    <h3>Get verified data from our engineer</h3>
-    <p class="hint">Three fields only. We reply within one working day.</p>
+    <h3 data-i18n="inquiry.title">Get verified data from our engineer</h3>
+    <p class="hint" data-i18n="inquiry.hint">Three fields only. We reply within one working day.</p>
     <form id="inquiry-form">
-      <label for="in-name">Name</label>
+      <label for="in-name" data-i18n="inquiry.name">Name</label>
       <input id="in-name" name="name" required>
-      <label for="in-company">Company</label>
+      <label for="in-company" data-i18n="inquiry.company">Company</label>
       <input id="in-company" name="company" required>
-      <label for="in-contact">Email / WhatsApp</label>
+      <label for="in-contact" data-i18n="inquiry.contact">Email / WhatsApp</label>
       <input id="in-contact" name="contact" required>
       <div class="actions">
-        <button class="btn ghost" type="button" id="inquiry-close">Cancel</button>
-        <button class="btn" type="submit" id="inquiry-submit">Send</button>
+        <button class="btn ghost" type="button" id="inquiry-close" data-i18n="inquiry.cancel">Cancel</button>
+        <button class="btn" type="submit" id="inquiry-submit" data-i18n="inquiry.send">Send</button>
       </div>
     </form>
   </div>
@@ -73,24 +85,35 @@
 <footer class="site-footer">
   <div class="wrap cols">
     <div>
-      <h4>Contact</h4>
+      <h4 data-i18n="footer.contact">Contact</h4>
       <ul>
-        <li>Email: sales@kuchuangyide.com</li>
-        <li>WhatsApp: +86-xxx-xxxx-xxxx</li>
+        <li data-i18n="footer.email">Email: sales@kuchuangyide.com</li>
+        <li data-i18n="footer.whatsapp">WhatsApp: +86-xxx-xxxx-xxxx</li>
       </ul>
     </div>
     <div>
-      <h4>Trust</h4>
+      <h4 data-i18n="footer.trust">Trust</h4>
       <ul>
-        <li>Answers cite their source material</li>
-        <li>Unverified questions go straight to an engineer</li>
+        <li data-i18n="footer.trust1">Answers cite their source material</li>
+        <li data-i18n="footer.trust2">Unverified questions go straight to an engineer</li>
       </ul>
     </div>
   </div>
 </footer>
 
+<script src="assets/js/i18n.js"></script>
 <script src="assets/js/inquiry.js"></script>
 <script src="assets/js/chat.js"></script>
+<script>
+  document.getElementById('lang-select').addEventListener('change', function () {
+    I18N.set(this.value);
+  });
+  // tooltip title for the attach button also follows the language
+  document.getElementById('chat-attach-btn').title = I18N.t('explorer.attach');
+  document.addEventListener('langchange', function () {
+    document.getElementById('chat-attach-btn').title = I18N.t('explorer.attach');
+  });
+</script>
 
 </body>
 </html>
