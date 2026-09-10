@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Explorer — KUCHUANG YIDE BLDC Motors</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="logo"><a href="index.html">KUCHUANG <span>YIDE</span></a></div>
+    <div class="header-note">AI Product Guide · answers only from our verified database</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="page-bar">
+    <h1>🤖 Product Explorer</h1>
+    <p>Ask anything about our BLDC motors — performance, materials, processes, application cases. The guide answers layer by layer, with sources.</p>
+  </section>
+
+  <!-- Layer 1: muted autoplay overview video (45–90s, H.264 720p, no scrub bar) -->
+  <section class="overview-video">
+    <video
+      id="overview-video"
+      muted
+      autoplay
+      loop
+      playsinline
+      preload="metadata"
+      controlslist="nodownload noplaybackrate"
+      src="assets/video/product-overview.mp4"
+    ></video>
+  </section>
+
+  <!-- Layer 2: guided chat on the verified knowledge base -->
+  <section class="chat-shell">
+    <div class="chat-log" id="chat-log"></div>
+    <div class="chat-attach" id="attach-preview"></div>
+    <div class="chat-input-row">
+      <button class="btn ghost" id="chat-attach-btn" type="button" title="Attach a photo of your current motor / equipment">📎</button>
+      <input type="file" id="chat-file" accept="image/*">
+      <input class="chat-input" id="chat-input" type="text"
+             placeholder="e.g. What magnet grade do you use?" autocomplete="off">
+      <button class="btn" id="chat-send" type="button">Send</button>
+    </div>
+  </section>
+</main>
+
+<button class="btn inquiry-fab" type="button" onclick="openInquiry()">💬 Inquiry</button>
+
+<div class="modal-mask" id="inquiry-mask">
+  <div class="modal">
+    <h3>Get verified data from our engineer</h3>
+    <p class="hint">Three fields only. We reply within one working day.</p>
+    <form id="inquiry-form">
+      <label for="in-name">Name</label>
+      <input id="in-name" name="name" required>
+      <label for="in-company">Company</label>
+      <input id="in-company" name="company" required>
+      <label for="in-contact">Email / WhatsApp</label>
+      <input id="in-contact" name="contact" required>
+      <div class="actions">
+        <button class="btn ghost" type="button" id="inquiry-close">Cancel</button>
+        <button class="btn" type="submit" id="inquiry-submit">Send</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap cols">
+    <div>
+      <h4>Contact</h4>
+      <ul>
+        <li>Email: sales@kuchuangyide.com</li>
+        <li>WhatsApp: +86-xxx-xxxx-xxxx</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Trust</h4>
+      <ul>
+        <li>Answers cite their source material</li>
+        <li>Unverified questions go straight to an engineer</li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/inquiry.js"></script>
+<script src="assets/js/chat.js"></script>
+
+</body>
+</html>

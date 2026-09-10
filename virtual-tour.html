@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Factory Tour — KUCHUANG YIDE</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="logo"><a href="index.html">KUCHUANG <span>YIDE</span></a></div>
+    <div class="header-note">Low-bandwidth video · plays smoothly on weak networks</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="page-bar">
+    <h1>🏭 Virtual Factory Tour</h1>
+    <p>Click a station to watch. Videos are kept small on purpose — clarity yields to smoothness, so they play even on unstable connections.</p>
+  </section>
+
+  <div class="snapshot-note">
+    📅 <b>Today's workshop snapshot</b> — fresh footage is recorded every day.
+    <span id="snapshot-date"></span>
+  </div>
+
+  <div class="tour-grid" id="tour-grid"></div>
+
+  <div class="tour-player" id="tour-player"></div>
+  <div class="tour-meta">
+    <span id="tour-title"></span>
+    <span id="tour-note"></span>
+  </div>
+
+  <div class="book-cta">
+    Want a <b>live guided tour</b> with our engineer walking the floor
+    and answering your questions in real time?
+    <br>
+    <button class="btn" type="button" onclick="openInquiry()">📞 Book a LIVE guided tour</button>
+    <p style="margin-top:10px">Leave your preferred time, time zone and WhatsApp — we will confirm a slot.</p>
+  </div>
+</main>
+
+<div class="modal-mask" id="inquiry-mask">
+  <div class="modal">
+    <h3>Book a LIVE guided tour</h3>
+    <p class="hint">Three fields only. We reply within one working day.</p>
+    <form id="inquiry-form">
+      <label for="in-name">Name</label>
+      <input id="in-name" name="name" required>
+      <label for="in-company">Company</label>
+      <input id="in-company" name="company" required>
+      <label for="in-contact">Email / WhatsApp + preferred time &amp; time zone</label>
+      <input id="in-contact" name="contact" required>
+      <div class="actions">
+        <button class="btn ghost" type="button" id="inquiry-close">Cancel</button>
+        <button class="btn" type="submit" id="inquiry-submit">Book</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap cols">
+    <div>
+      <h4>Contact</h4>
+      <ul>
+        <li>Email: sales@kuchuangyide.com</li>
+        <li>WhatsApp: +86-xxx-xxxx-xxxx</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Why the video looks soft</h4>
+      <ul>
+        <li>360–720p, under 900 kbps, on purpose</li>
+        <li>Smooth beats sharp on weak networks</li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/inquiry.js"></script>
+<script src="assets/js/tour.js"></script>
+<script>
+  document.getElementById('snapshot-date').textContent =
+    new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+</script>
+
+</body>
+</html>

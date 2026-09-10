@@ -1,0 +1,32 @@
+# AI tool configs
+.claude/
+.agent/
+.codebuddy/
+.codex/
+.continue/
+.cursor/
+.gemini/
+.kiro/
+.opencode/
+.qoder/
+.roo/
+.trae/
+.windsurf/
+.playwright-mcp/
+.spec-workflow/
+.copilot/
+.aider*
+.cline/
+.dify/
+.github/prompts/ui-ux-pro-max/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
