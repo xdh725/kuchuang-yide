@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知识库管理 · KUCHUANG YIDE</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+.admin-wrap { max-width: 980px; margin: 0 auto; padding: 28px 24px 80px; }
+.admin-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center; }
+.stat b { font-size: 26px; display: block; }
+.stat span { font-size: 12px; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); font-size: 14px; }
+th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; }
+.badge.ok { background: rgba(52,211,153,.15); color: var(--ok); }
+.badge.no { background: rgba(255,138,30,.15); color: var(--accent); }
+.panel { background: var(--card); border: 1px solid var(--line-strong); border-radius: 14px; padding: 20px; margin: 18px 0; }
+.panel h3 { margin-bottom: 14px; }
+.fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fgrid .full { grid-column: 1 / -1; }
+label { display: block; font-size: 12px; font-weight: 700; margin: 10px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+input[type=text], select, textarea {
+  width: 100%; background: var(--bg-2); color: var(--ink);
+  border: 1px solid var(--line-strong); border-radius: 10px; padding: 9px 12px; font-family: inherit; font-size: 14px;
+}
+textarea { min-height: 110px; resize: vertical; }
+.check-row { display: flex; gap: 18px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+#login-box { max-width: 360px; margin: 12vh auto; }
+#report { font-size: 13px; max-height: 320px; overflow: auto; background: var(--bg-2); border-radius: 10px; padding: 12px; margin-top: 12px; display: none; }
+.hidden { display: none; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ok); color: #04121a; padding: 8px 18px; border-radius: 999px; font-size: 13px; font-weight: 700; z-index: 99; display: none; }
+.row-actions button { margin-right: 6px; }
+</style>
+</head>
+<body>
+<div class="admin-wrap">
+
+  <!-- 登录 -->
+  <div id="login-box" class="panel">
+    <h3>知识库管理登录</h3>
+    <label>管理员密码</label>
+    <input type="password" id="pw" autocomplete="current-password">
+    <div style="margin-top:14px"><button class="btn" onclick="doLogin()">登录</button></div>
+  </div>
+
+  <!-- 主界面 -->
+  <div id="main" class="hidden">
+    <div class="admin-bar">
+      <h2 style="font-size:20px">知识库管理</h2>
+      <button class="btn ghost" onclick="doLogout()">退出</button>
+    </div>
+
+    <div class="stat-row" id="stats"></div>
+
+    <div class="panel">
+      <h3>入库与验收</h3>
+      <button class="btn" onclick="rebuild()">🔄 重建索引（verified 素材 → 向量库）</button>
+      <button class="btn ghost" onclick="runGolden()">🎯 跑黄金集（命中率 ≥80% 放行）</button>
+      <div id="report"></div>
+    </div>
+
+    <div class="panel">
+      <h3 id="editor-title">新建素材</h3>
+      <div class="fgrid">
+        <div><label>ID（KB-XX-000）</label><input type="text" id="f-id" placeholder="KB-MD-004"></div>
+        <div><label>标题</label><input type="text" id="f-title" placeholder="KC-5008 电机规格"></div>
+        <div><label>标签（逗号分隔）</label><input type="text" id="f-tags" placeholder="model, kc-5008, agv"></div>
+        <div><label>类型</label><select id="f-type"><option>text</option><option>spec-sheet</option><option>image</option><option>video</option></select></div>
+        <div class="full"><label>媒体上传（图片/短视频 → R2，可空）</label><input type="file" id="f-media" accept="image/*,video/mp4"></div>
+        <div class="full"><label>EN 正文（事实陈述，无营销词）</label><textarea id="f-en" placeholder="The KC-5008..."></textarea></div>
+        <div class="full"><label>ZH 正文</label><textarea id="f-zh" placeholder="KC-5008 ..."></textarea></div>
+      </div>
+      <div class="check-row">
+        <label style="margin:0;text-transform:none;letter-spacing:0"><input type="checkbox" id="f-verified"> 已核实（verified）</label>
+        <input type="text" id="f-by" placeholder="核实人" style="width:140px">
+        <button class="btn" onclick="saveEntry()">保存</button>
+        <button class="btn ghost" onclick="resetEditor()">清空</button>
+      </div>
+    </div>
+
+    <h3>素材列表</h3>
+    <table>
+      <thead><tr><th>ID</th><th>标题</th><th>标签</th><th>核实</th><th>更新</th><th>操作</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+
+    <div class="panel">
+      <h3>黄金集（工程师独立写：问题 + 应命中的素材ID）</h3>
+      <div class="fgrid">
+        <div><label>问题</label><input type="text" id="g-q" placeholder="What is the KV value of KC-4215?"></div>
+        <div><label>预期命中 ID</label><input type="text" id="g-id" placeholder="KB-MD-001"></div>
+        <div><label>语言</label><select id="g-lang"><option>en</option><option>zh</option></select></div>
+        <div style="display:flex;align-items:flex-end"><button class="btn" onclick="addGolden()">添加</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+let entries = [];
+
+async function api(path, opts) {
+  const r = await fetch('/api/admin/' + path, { credentials: 'same-origin', ...opts });
+  if (r.status === 401) { $('login-box').classList.remove('hidden'); $('main').classList.add('hidden'); throw new Error('unauthorized'); }
+  return r.json();
+}
+function toast(msg, ok = true) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.style.background = ok ? 'var(--ok)' : 'var(--accent)';
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2200);
+}
+
+// ── 登录 ──
+async function doLogin() {
+  const r = await fetch('/api/admin/login', {
+    method: 'POST', credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: $('pw').value }),
+  });
+  if (r.ok) { $('login-box').classList.add('hidden'); $('main').classList.remove('hidden'); await refresh(); }
+  else toast('密码错误', false);
+}
+async function doLogout() { await api('logout', { method: 'POST' }); location.reload(); }
+$('pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ── 概览 + 列表 ──
+async function refresh() {
+  const s = await api('stats');
+  $('stats').innerHTML =
+    '<div class="stat"><b>' + (s.stats.total || 0) + '</b><span>素材总数</span></div>' +
+    '<div class="stat"><b>' + (s.stats.verified || 0) + '</b><span>已核实</span></div>' +
+    '<div class="stat"><b>' + (s.stats.golden || 0) + '</b><span>黄金集题数</span></div>' +
+    '<div class="stat"><b>' + (s.last_rebuild ? s.last_rebuild.entry_count : '—') + '</b><span>最近索引</span></div>';
+  const d = await api('entries');
+  entries = d.entries || [];
+  $('tbody').innerHTML = entries.map(e =>
+    '<tr><td>' + e.id + '</td><td>' + e.title + '</td><td style="font-size:12px;color:var(--muted)">' + e.tags + '</td>' +
+    '<td>' + (e.verified ? '<span class="badge ok">✓ ' + (e.verified_by || '') + '</span>' : '<span class="badge no">未核实</span>') + '</td>' +
+    '<td style="font-size:12px;color:var(--muted)">' + e.updated_at + '</td>' +
+    '<td class="row-actions"><button class="btn ghost" onclick="editEntry(\'' + e.id + '\')">编辑</button>' +
+    '<button class="btn ghost" onclick="delEntry(\'' + e.id + '\')">删除</button></td></tr>'
+  ).join('');
+}
+
+// ── 编辑器 ──
+function resetEditor() {
+  ['f-id','f-title','f-tags','f-en','f-zh','f-by','f-media'].forEach(i => $(i).value = '');
+  $('f-type').value = 'text'; $('f-verified').checked = false;
+  $('editor-title').textContent = '新建素材';
+}
+function editEntry(id) {
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+  $('f-id').value = e.id; $('f-id').readOnly = true;
+  $('f-title').value = e.title; $('f-tags').value = e.tags; $('f-type').value = e.type;
+  $('f-en').value = e.body_en; $('f-zh').value = e.body_zh;
+  $('f-verified').checked = !!e.verified; $('f-by').value = e.verified_by || '';
+  $('editor-title').textContent = '编辑 ' + id;
+  window.scrollTo({ top: document.querySelector('.panel').offsetTop - 80, behavior: 'smooth' });
+}
+async function saveEntry() {
+  let media = null;
+  const f = $('f-media').files[0];
+  if (f) {
+    const fd = new FormData(); fd.append('file', f);
+    const up = await api('upload', { method: 'POST', body: fd });
+    if (!up.ok) return toast('上传失败: ' + up.error, false);
+    media = up.key; toast('媒体已上传 ' + media);
+  }
+  const body = {
+    id: $('f-id').value.trim(), title: $('f-title').value.trim(),
+    tags: $('f-tags').value.trim(), type: $('f-type').value, media,
+    body_en: $('f-en').value.trim(), body_zh: $('f-zh').value.trim(),
+    verified: $('f-verified').checked, verified_by: $('f-by').value.trim(),
+  };
+  const saved = await api('entries', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  });
+  if (saved.ok) { toast('已保存'); $('f-id').readOnly = false; resetEditor(); refresh(); }
+  else toast(saved.error || '保存失败', false);
+}
+async function delEntry(id) {
+  if (!confirm('删除 ' + id + '？')) return;
+  await api('entries/' + encodeURIComponent(id), { method: 'DELETE' });
+  toast('已删除'); refresh();
+}
+
+// ── 入库 / 黄金集 ──
+async function rebuild() {
+  toast('重建中…（每条素材一次 embedding，40条约1分钟）');
+  const r = await api('rebuild', { method: 'POST' });
+  if (r.ok) { toast('✓ 已索引 ' + r.indexed + ' 条'); refresh(); }
+  else toast(r.error || '失败', false);
+}
+async function addGolden() {
+  const r = await api('golden', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ q: $('g-q').value.trim(), expected_kb_id: $('g-id').value.trim(), lang: $('g-lang').value }),
+  });
+  if (r.ok) { toast('已添加'); $('g-q').value = ''; $('g-id').value = ''; } else toast(r.error, false);
+}
+async function runGolden() {
+  toast('测试中…');
+  const r = await api('golden/run', { method: 'POST' });
+  const box = $('report');
+  box.style.display = 'block';
+  box.innerHTML =
+    '<b>命中率: ' + r.hit_rate + '% (' + r.hit + '/' + r.total + ')  阈值: ' + r.threshold + '  ' +
+    (r.gate_pass ? '✓ GATE PASS（≥80% 放行）' : '✗ 未达标（不放行）') + '</b><br><br>' +
+    (r.report || []).map(x =>
+      '<div>' + (x.hit ? '✓' : '✗') + ' [' + (x.lang || '') + '] ' + x.q +
+      ' → top1: ' + x.top1 + ' (' + (x.top1_score || 0).toFixed(3) + ')' +
+      (x.hit ? '' : ' <span style="color:var(--accent)">预期 ' + x.expected + '</span>') + '</div>'
+    ).join('');
+}
+
+// 初始：探测会话
+(async () => {
+  try { await api('stats'); $('login-box').classList.add('hidden'); $('main').classList.remove('hidden'); refresh(); }
+  catch (e) { /* 显示登录框 */ }
+})();
+</script>
+</body>
+</html>

@@ -31,6 +31,14 @@ assets/     前端静态资源（css / js / img / video）
 - **禁止用 emoji 当图标**
 - prompt 模板与生成管线见 `docs/design-system.md` §4.6
 
+## 知识库后台管理（/admin）
+
+- `workers/public-admin/admin.html`：单页后台（登录→素材CRUD→媒体上传R2→重建索引→黄金集管理/命中测试）
+- API：`workers/src/admin.js`（D1 `entries`/`golden` 表）+ `auth.js`（单管理员密码，ADMIN_PASSWORD secret）
+- 部署后访问 `https://<workers域名>/admin`；素材存 D1，媒体存 R2，重建索引=embedding→Vectorize
+- 首次部署：`wrangler d1 execute kcyd-kb --file=schema.sql` 建表 + `wrangler secret put ADMIN_PASSWORD`
+- D1/R2/KV 的 PLACEHOLDER ID 创建资源后填回 wrangler.toml
+
 ## 多语言（i18n）
 
 - 零依赖实现：`assets/js/i18n.js`（语言包字典 + localStorage 持久化 + 浏览器语言自动检测）

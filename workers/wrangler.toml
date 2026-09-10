@@ -1,6 +1,7 @@
 name = "kuchuang-yide"
 compatibility_date = "2026-09-01"
 main = "src/index.js"
+assets = { directory = "../public-admin", binding = "ASSETS" }   # /admin 后台页（仅此一页走资产）
 
 [[vectorize_indexes]]
 binding = "KB"
@@ -11,6 +12,14 @@ metric = "cosine"
 [[kv_namespaces]]
 binding = "COUNTERS"
 id = "PLACEHOLDER_KV_ID"   # wrangler kv namespace create 后填回
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kcyd-kb"
+database_id = "PLACEHOLDER_D1_ID"   # wrangler d1 create 后填回
+
+[[r2_buckets]]
+binding = "MEDIA"                    # 后台上传的图片/视频
 
 [[unsafe.bindings]]        # 原子 IP 限流（chat）
 name = "CHAT_RL"
@@ -30,7 +39,7 @@ DAILY_CHAT_CAP = "5000"
 GATE_ENABLED = "true"      # 黄金集命中率≥80% 才放行 AI；false=强制全兜底（上线前开关）
 
 # secrets（wrangler secret put）：
-# ZHIPU_API_KEY / FEISHU_WEBHOOK / TURNSTILE_SECRET
+# ZHIPU_API_KEY / FEISHU_WEBHOOK / TURNSTILE_SECRET / ADMIN_PASSWORD
 
 [observability]
 enabled = true
