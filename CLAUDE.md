@@ -16,6 +16,21 @@ assets/     前端静态资源（css / js / img / video）
 *.html      网站四个页面：index / product-explorer / virtual-tour / thank-you
 ```
 
+## 开发流程（用户规定，2026-09-10）
+
+后续所有网站/页面开发按固定顺序执行，不得跳步：
+1. **需求分析** → `docs/ux/ux-analysis.md`（画像/旅程/验收标准）
+2. **原型设计** → `prototypes/`（低保真线框，浏览器可交互）+ `docs/ux/wireframes.md`
+3. **页面设计** → 按原型细化视觉稿（如需图片素材，用 Seedream 生成）
+4. **制定设计规范** → `docs/design-system.md`（Token 唯一来源，改设计先改文档再改 CSS）
+5. **开发** → 实现落地 + 浏览器实测 + 部署验证
+
+## 图标与图片（全局规则）
+
+- 所有图标/图片**用 AI 生成**：火山方舟 Seedream 5.0，`bash ~/scripts/seedream-generate.sh "<prompt>" <out.png>`（凭证 `~/.claude/credentials.env`）
+- **禁止用 emoji 当图标**
+- prompt 模板与生成管线见 `docs/design-system.md` §4.6
+
 ## 多语言（i18n）
 
 - 零依赖实现：`assets/js/i18n.js`（语言包字典 + localStorage 持久化 + 浏览器语言自动检测）

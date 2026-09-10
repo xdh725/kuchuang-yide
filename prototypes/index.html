@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframes — KUCHUANG YIDE</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#e9eaf0;margin:0;padding:40px;color:#222}
+h1{font-size:22px} p.lead{color:#556;margin:6px 0 28px;max-width:640px}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:28px}
+.frame{background:#fff;border:1px solid #c9ccd8;border-radius:10px;overflow:hidden;box-shadow:0 10px 30px -18px rgba(0,0,0,.35)}
+.frame .cap{padding:10px 14px;border-bottom:1px dashed #c9ccd8;font-size:13px;color:#556;display:flex;justify-content:space-between}
+.frame .cap b{color:#222}
+.frame iframe{width:100%;height:560px;border:0;display:block;background:#fff}
+</style>
+</head>
+<body>
+<h1>Wireframes · 酷创易德外贸官网</h1>
+<p class="lead">低保真线框（灰阶）。只看结构与流程，不看视觉。每帧可独立打开交互（点击/输入均可用）。对应文档：<code>docs/ux/wireframes.md</code></p>
+<div class="board">
+  <div class="frame"><div class="cap"><b>W1 首页</b>index</div><iframe src="w1-home.html"></iframe></div>
+  <div class="frame"><div class="cap"><b>W2 产品导览</b>product-explorer</div><iframe src="w2-explorer.html"></iframe></div>
+  <div class="frame"><div class="cap"><b>W3 云参观</b>virtual-tour</div><iframe src="w3-tour.html"></iframe></div>
+  <div class="frame"><div class="cap"><b>W4 感谢页</b>thank-you</div><iframe src="w4-thanks.html"></iframe></div>
+</div>
+</body>
+</html>

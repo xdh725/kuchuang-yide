@@ -8,11 +8,11 @@
   // Phase 1 placeholder paths — replace with real R2/CDN URLs after
   // encoding per docs/video-encoding-guide.md (720p / 500-700kbps / 15fps).
   var STATIONS = [
-    { key: 'warehouse', emoji: '📦', video: 'assets/video/tour-warehouse.mp4' },
-    { key: 'winding', emoji: '🧵', video: 'assets/video/tour-winding.mp4' },
-    { key: 'inspection', emoji: '🔍', video: 'assets/video/tour-inspection.mp4' },
-    { key: 'burnin', emoji: '🔥', video: 'assets/video/tour-burnin.mp4' },
-    { key: 'packing', emoji: '📦', video: 'assets/video/tour-packing.mp4' }
+    { key: 'warehouse', icon: 'assets/img/icon-warehouse-256.webp', video: 'assets/video/tour-warehouse.mp4' },
+    { key: 'winding', icon: 'assets/img/icon-winding-256.webp', video: 'assets/video/tour-winding.mp4' },
+    { key: 'inspection', icon: 'assets/img/icon-inspection-256.webp', video: 'assets/video/tour-inspection.mp4' },
+    { key: 'burnin', icon: 'assets/img/icon-burnin-256.webp', video: 'assets/video/tour-burnin.mp4' },
+    { key: 'packing', icon: 'assets/img/icon-packing-256.webp', video: 'assets/video/tour-packing.mp4' }
   ];
 
   var grid = document.getElementById('tour-grid');
@@ -21,7 +21,7 @@
   var title = document.getElementById('tour-title');
   var current = 0;
 
-  function stationLabel(st) { return st.emoji + ' ' + I18N.t('st.' + st.key); }
+  function stationLabel(st) { return I18N.t('st.' + st.key); }
 
   function activate(i) {
     current = i;
@@ -53,9 +53,12 @@
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'tour-btn';
-    var e = document.createElement('span');
-    e.className = 'emoji';
-    e.textContent = st.emoji;
+    var e = document.createElement('img');
+    e.className = 'station-icon';
+    e.src = st.icon;
+    e.alt = '';
+    e.loading = 'lazy';
+    e.width = 44; e.height = 44;
     var l = document.createElement('span');
     l.textContent = I18N.t('st.' + st.key);
     b.appendChild(e);
