@@ -9,7 +9,7 @@
   'use strict';
 
   // Workers 后端（生产）。本地开发可改为 http://localhost:8787/api/chat
-  var RAG_ENDPOINT = 'https://kuchuang-yide.xdh725-kcyd.workers.dev/api/chat';
+  var RAG_ENDPOINT = '/api/chat'; // 同域（阿里云服务器 standalone 后端）
 
   var log = document.getElementById('chat-log');
   var input = document.getElementById('chat-input');
