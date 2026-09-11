@@ -54,11 +54,14 @@ assets/     前端静态资源（css / js / img / video）
 - 当前支持 EN（默认）/ 中文；**新增语言**：在 `i18n.js` 的 `DICT` 加语言块 + 四个页面 `<select id="lang-select">` 加 `<option>`
 - 切换后 dispatch `langchange` 事件；chat 请求自动携带 `lang` 字段（后端按语言返回）
 
-## 预览部署
+## 部署（全站已收敛至 Workers，GitHub Pages 已下线）
 
-- **GitHub Pages**：https://xdh725.github.io/kuchuang-yide/ （仓库 xdh725/kuchuang-yide，master 分支即线上）
-- **正式部署目标仍是 Cloudflare Pages + R2**（见 `docs/deployment.md`；GitHub Pages 仅预览用）
-- 注意：GitHub Pages CDN 对 HTML/JS 缓存 max-age=600，部署新版本后浏览器最多延迟 10 分钟
+- **唯一站点**：https://kuchuang-yide.xdh725-kcyd.workers.dev
+  - 官网 4 页 + admin 后台 = Workers 静态托管（`workers/public/`，wrangler.toml [assets]）
+  - /api/* = 同域 Worker（chat/inquiry/admin），**同域零 CORS**
+- 改根目录源码页面后：`bash scripts/sync-site.sh && cd workers && wrangler deploy`
+- 官网页内链用 .html 后缀（assets 307 → clean URL，浏览器无感）
+- 旧 GitHub Pages 已删除（gh api -X DELETE repos/.../pages）
 
 
 ## 核心原则（写代码前必读）

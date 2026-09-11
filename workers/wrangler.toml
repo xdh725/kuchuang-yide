@@ -1,7 +1,12 @@
 name = "kuchuang-yide"
 compatibility_date = "2026-09-01"
 main = "src/index.js"
-assets = { directory = "./public-admin", binding = "ASSETS" }   # /admin 后台页（仅此一页走资产）
+# 全站静态资产（官网4页 + admin 后台）——Workers 静态托管，同域零 CORS
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "404-page"
+run_worker_first = ["/api/*"]   # API 走 Worker，其余走静态
 
 [[vectorize]]
 binding = "KB"

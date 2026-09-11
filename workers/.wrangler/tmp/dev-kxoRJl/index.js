@@ -123,10 +123,10 @@ var init_ratelimit = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-vwYORq/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-7A7boc/middleware-loader.entry.ts
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-vwYORq/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-7A7boc/middleware-insertion-facade.js
 init_modules_watch_stub();
 
 // src/index.js
@@ -579,9 +579,6 @@ var src_default = {
         { status: 501, headers: { "Content-Type": "application/json", ...CORS } }
       );
     }
-    if (path === "/admin" || path === "/admin/" || path.startsWith("/assets/") || path === "/favicon.svg") {
-      return env.ASSETS.fetch(request);
-    }
     if (path === "/api/admin/login" && request.method === "POST") return login(request, env);
     if (path === "/api/admin/logout" && request.method === "POST") return logout(request, env);
     if (path.startsWith("/api/admin/")) {
@@ -646,7 +643,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-vwYORq/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-7A7boc/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -679,7 +676,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-vwYORq/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-7A7boc/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

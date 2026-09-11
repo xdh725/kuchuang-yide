@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KUCHUANG YIDE — High-Performance BLDC Motors</title>
+<meta name="description" content="KUCHUANG YIDE manufactures high-performance brushless DC motors for drones, AGV, robotics and pumps. Explore products with our AI guide, or take a virtual factory tour.">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/lang.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="logo"><a href="index.html"><span class="mark">KY</span>KUCHUANG <span class="word">YIDE</span></a></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="header-note" data-i18n="header.note">BLDC Motor Manufacturer · B2B Export</span>
+      <span class="lang-switch">
+        <label for="lang-select">🌐</label>
+        <select id="lang-select" aria-label="Language">
+          <option value="en">EN</option>
+          <option value="zh">中文</option>
+        </select>
+      </span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <div class="eyebrow" data-i18n="home.eyebrow">Precision BLDC Engineering</div>
+    <h1 data-i18n-html="home.hero.title">High-Performance BLDC Motors,<br>Built and Proven in Our Own Factory</h1>
+    <p class="sub" data-i18n-html="home.hero.sub">Two ways to get to know us — <b>talk to our AI product guide</b>, or <b>step inside the workshop</b> from wherever you are.</p>
+
+    <div class="entries">
+      <a class="entry-card" href="product-explorer.html">
+        <span class="card-index">01</span>
+        <h2 data-i18n="home.card1.title">Explore Our Products</h2>
+        <p data-i18n="home.card1.body">Chat with our AI guide. Ask about performance, raw materials, production processes and application cases — answered only from our verified product database, layer by layer.</p>
+        <span class="go" data-i18n="home.card1.go">Start the conversation</span>
+      </a>
+
+      <a class="entry-card" href="virtual-tour.html">
+        <span class="card-index">02</span>
+        <h2 data-i18n="home.card2.title">Virtual Factory Tour</h2>
+        <p data-i18n="home.card2.body">Walk through our winding stations, CCD vision inspection, burn-in room and packing area in low-bitrate video — designed to play smoothly even on unstable connections.</p>
+        <span class="go" data-i18n="home.card2.go">Enter the workshop</span>
+      </a>
+    </div>
+
+    <div class="hero-cta">
+      <a class="btn" href="product-explorer.html" data-i18n="home.cta1">Talk to our AI guide</a>
+      <a class="btn ghost" href="virtual-tour.html" data-i18n="home.cta2">Tour the factory</a>
+    </div>
+
+    <div class="stats" role="list">
+      <div role="listitem"><b>5</b><span data-i18n="home.stat1">application fields</span></div>
+      <div role="listitem"><b>5</b><span data-i18n="home.stat2">in-line QC steps</span></div>
+      <div role="listitem"><b>1</b><span data-i18n="home.stat3">working-day engineer reply</span></div>
+      <div role="listitem"><b>EN/中</b><span data-i18n="home.stat4">bilingual guide</span></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap cols">
+    <div>
+      <h4 data-i18n="footer.contact">Contact</h4>
+      <ul>
+        <li data-i18n="footer.email">Email: sales@kuchuangyide.com</li>
+        <li data-i18n="footer.whatsapp">WhatsApp: +86-xxx-xxxx-xxxx</li>
+        <li data-i18n="footer.address">Address: [Factory address, City, China]</li>
+      </ul>
+    </div>
+    <div>
+      <h4 data-i18n="footer.brand">KUCHUANG YIDE</h4>
+      <ul>
+        <li data-i18n="footer.line1">High-performance BLDC motors</li>
+        <li data-i18n="footer.line2">Drones · AGV · Robotics · Pumps</li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/i18n.js"></script>
+<script>
+  document.getElementById('lang-select').addEventListener('change', function () {
+    I18N.set(this.value);
+  });
+</script>
+
+</body>
+</html>

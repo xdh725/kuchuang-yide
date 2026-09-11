@@ -33,10 +33,6 @@ export default {
     }
 
     // ── 后台 ──
-    // 静态资产（/admin 页面及其 css）由 env.ASSETS 提供
-    if (path === '/admin' || path === '/admin/' || path.startsWith('/assets/') || path === '/favicon.svg') {
-      return env.ASSETS.fetch(request);
-    }
     if (path === '/api/admin/login' && request.method === 'POST') return login(request, env);
     if (path === '/api/admin/logout' && request.method === 'POST') return logout(request, env);
 
