@@ -54,6 +54,16 @@ assets/     前端静态资源（css / js / img / video）
 - 当前支持 EN（默认）/ 中文；**新增语言**：在 `i18n.js` 的 `DICT` 加语言块 + 四个页面 `<select id="lang-select">` 加 `<option>`
 - 切换后 dispatch `langchange` 事件；chat 请求自动携带 `lang` 字段（后端按语言返回）
 
+## 阿里云轻量服务器部署（独立版，2026-09-12）
+
+- **服务器**：轻量应用服务器 us-west-1（ID 2ac77f8768834d629b761f1c6502b0f5，宝塔面板，1.8G 内存）
+- **站点**：http://47.254.25.245 （Nginx 80 → Node :8090，systemd 服务 kcyd 自启）
+- **代码**：`standalone-server/`（SQLite 替代 D1 / 内存向量检索替代 Vectorize / 智谱 GLM 不变）
+- **运维**：`systemctl restart kcyd`；日志 `journalctl -u kcyd -f`；数据 `kcyd.db` + `vectors.json`
+- **远程操作**：workbench CLI 不支持轻量服务器——用 SWAS RunCommand API（封装在 /tmp/swas-exec.py 模式，凭证 ALIYUN_AK/SK=workbench-deploy 子账号）
+- 更新部署：git push → 服务器 `cd /www/wwwroot/kuchuang-yide && git pull && systemctl restart kcyd`
+- **注意**：与 workers.dev 版并行（两套独立数据）；Workers 版数据以远程 D1 为准
+
 ## 部署（全站已收敛至 Workers，GitHub Pages 已下线）
 
 - **唯一站点**：https://kuchuang-yide.xdh725-kcyd.workers.dev
