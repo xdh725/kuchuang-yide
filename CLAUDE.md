@@ -64,14 +64,11 @@ assets/     前端静态资源（css / js / img / video）
 - 更新部署：git push → 服务器 `cd /www/wwwroot/kuchuang-yide && git pull && systemctl restart kcyd`
 - **注意**：与 workers.dev 版并行（两套独立数据）；Workers 版数据以远程 D1 为准
 
-## 部署（全站已收敛至 Workers，GitHub Pages 已下线）
+## 部署（2026-09-12 起：唯一线上站点 = 阿里云轻量服务器）
 
-- **唯一站点**：https://kuchuang-yide.xdh725-kcyd.workers.dev
-  - 官网 4 页 + admin 后台 = Workers 静态托管（`workers/public/`，wrangler.toml [assets]）
-  - /api/* = 同域 Worker（chat/inquiry/admin），**同域零 CORS**
-- 改根目录源码页面后：`bash scripts/sync-site.sh && cd workers && wrangler deploy`
-- 官网页内链用 .html 后缀（assets 307 → clean URL，浏览器无感）
-- 旧 GitHub Pages 已删除（gh api -X DELETE repos/.../pages）
+- **唯一站点**：http://47.254.25.245 （workers.dev 已删除；GitHub Pages 早已下线）
+- Workers 版代码（workers/）保留在仓库作 CF 参考实现；CF 账号资源（D1/Vectorize/KV）未删，可随时 `cd workers && wrangler deploy` 恢复
+- workers/ 下的源码改动不再自动上线；线上以 standalone-server/ + workers/public/（服务器 git pull）为准
 
 
 ## 核心原则（写代码前必读）
