@@ -35,3 +35,11 @@ workers/.dev.vars
 
 # deps
 workers/node_modules/
+
+# runtime data (server)
+kcyd.db*
+vectors.json
+standalone-server/kcyd.db*
+standalone-server/vectors.json
+standalone-server/server.log
+standalone-server/node_modules/
