@@ -69,6 +69,12 @@ textarea { min-height: 110px; resize: vertical; }
 @media (prefers-reduced-motion: reduce) { .login-shell { animation: none; } }
 #report { font-size: 13px; max-height: 320px; overflow: auto; background: var(--bg-2); border-radius: 10px; padding: 12px; margin-top: 12px; display: none; }
 .hidden { display: none; }
+.draft-card { border: 1px solid var(--line-strong); border-radius: 12px; padding: 14px; margin-top: 12px; background: var(--bg-2); }
+.draft-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.draft-head select, .draft-head input { width: auto; flex: 1; min-width: 120px; }
+.draft-bodies { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.draft-bodies textarea { min-height: 80px; font-size: 13px; }
+@media (max-width: 720px) { .draft-bodies { grid-template-columns: 1fr; } }
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ok); color: #04121a; padding: 8px 18px; border-radius: 999px; font-size: 13px; font-weight: 700; z-index: 99; display: none; }
 .row-actions button { margin-right: 6px; }
 </style>
@@ -111,6 +117,17 @@ textarea { min-height: 110px; resize: vertical; }
       <button class="btn" onclick="rebuild()">🔄 重建索引（verified 素材 → 向量库）</button>
       <button class="btn ghost" onclick="runGolden()">🎯 跑黄金集（命中率 ≥80% 放行）</button>
       <div id="report"></div>
+    </div>
+
+    <div class="panel" id="assist-panel">
+      <h3>💬 对话式录入（口述 / 粘贴资料 / 上传文件 → AI 抽取条目草稿）</h3>
+      <textarea id="assist-input" placeholder="例如：我们新出一款 KC-6009 外转子电机，KV 200，额定电压 48V，最大电流 28A，用于叉车 AGV，IP65，定子 60×9，重量 520g，用 N40SH 磁钢。&#10;或直接粘贴规格书/BOM/工序说明的全部文本，或上传 txt/md 文件——AI 会拆成多条双语条目草稿。"></textarea>
+      <div class="check-row">
+        <input type="file" id="assist-file" accept=".txt,.md,.csv,.json" style="max-width:260px">
+        <button class="btn" id="assist-btn" onclick="runAssist()">✨ AI 解析成条目</button>
+        <span id="assist-status" style="font-size:12px;color:var(--muted)">解析后逐条确认入库，AI 不直接写库</span>
+      </div>
+      <div id="assist-drafts"></div>
     </div>
 
     <div class="panel">
@@ -268,6 +285,71 @@ async function delEntry(id) {
   await api('entries/' + encodeURIComponent(id), { method: 'DELETE' });
   toast('已删除'); refresh();
 }
+
+// ── 对话式录入 ──
+async function runAssist() {
+  let input = $('assist-input').value.trim();
+  const f = $('assist-file').files[0];
+  if (f) {
+    input += '\n' + await f.text();
+  }
+  if (!input) return toast('请输入内容或选择文件', false);
+  const btn = $('assist-btn');
+  btn.disabled = true; btn.textContent = 'AI 解析中…（可能 30-60 秒）';
+  $('assist-status').textContent = '';
+  try {
+    const r = await api('assist', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input }),
+    });
+    if (!r.ok) return $('assist-status').textContent = r.error;
+    renderDrafts(r.drafts);
+    $('assist-status').textContent = '解析出 ' + r.drafts.length + ' 条草稿——核对后逐条入库';
+  } catch (e) {
+    $('assist-status').textContent = '请求失败：' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '✨ AI 解析成条目';
+  }
+}
+let drafts = [];
+async function renderDrafts(list) {
+  const ids = await api('next-id');
+  drafts = list.map((d, i) => ({ ...d, suggested: ids }));
+  $('assist-drafts').innerHTML = drafts.map((d, i) =>
+    '<div class="draft-card">' +
+    '<div class="draft-head">' +
+    '<select id="dr-pfx-' + i + '">' +
+      ['model|MD 型号','raw-material|RM 材料','process|PR 工序','application|AP 场景','effect|EF 效果']
+        .map(x => { const [label, pfx] = x.split('|'); return '<option value="' + pfx + '">' + pfx + ' ' + label + '</option>'; }).join('') +
+    '</select>' +
+    '<input type="text" id="dr-id-' + i + '" value="' + (d.suggested.MD || '') + '" style="max-width:130px" title="条目 ID">' +
+    '<input type="text" id="dr-title-' + i + '" value="' + d.title.replace(/"/g,'&quot;') + '" style="flex:2;min-width:200px">' +
+    '<button class="btn" onclick="saveDraft(' + i + ')">入库此条</button>' +
+    '</div>' +
+    '<div class="draft-bodies">' +
+    '<textarea id="dr-en-' + i + '">' + d.body_en + '</textarea>' +
+    '<textarea id="dr-zh-' + i + '">' + d.body_zh + '</textarea>' +
+    '</div></div>'
+  ).join('');
+}
+async function saveDraft(i) {
+  const body = {
+    id: $('dr-id-' + i).value.trim(),
+    title: $('dr-title-' + i).value.trim(),
+    tags: drafts[i].tags, type: drafts[i].type,
+    body_en: $('dr-en-' + i).value.trim(),
+    body_zh: $('dr-zh-' + i).value.trim(),
+    verified: false, verified_by: 'AI草稿-待工程师核实',
+  };
+  if (!/^KB-[A-Z]{2}-\d{3}$/.test(body.id)) return toast('ID 格式须为 KB-XX-000', false);
+  const r = await api('entries', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (r.ok) { toast('已入库 ' + body.id + '（未核实）'); refresh(); }
+  else toast(r.error || '失败', false);
+}
+$('assist-file').addEventListener('change', () => { if ($('assist-file').files[0]) toast('文件已附加：' + $('assist-file').files[0].name); });
 
 // ── 入库 / 黄金集 ──
 async function rebuild() {

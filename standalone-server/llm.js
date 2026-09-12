@@ -21,7 +21,7 @@ async function zhipuFetch(path, body, timeout = TIMEOUT_MS) {
 export async function chat(model, messages, opts = {}) {
   const body = { model, messages, temperature: opts.temperature ?? 0.2, max_tokens: opts.max_tokens ?? 800 };
   if (opts.noThinking) body.thinking = { type: 'disabled' };
-  const d = await zhipuFetch('/chat/completions', body);
+  const d = await zhipuFetch('/chat/completions', body, opts.timeout ?? TIMEOUT_MS);
   const content = d.choices?.[0]?.message?.content;
   if (typeof content !== 'string' || !content.trim()) throw new Error('zhipu chat empty content');
   return content.trim();

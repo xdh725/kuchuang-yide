@@ -13,6 +13,7 @@ import { postFilter } from './postfilter.js';
 import { fallbackResponse } from './fallback.js';
 import { chat, embed, models } from './llm.js';
 import { signUpload } from './oss.js';
+import { extractEntries } from './assist.js';
 import {
   ADMIN_PASSWORD, KB_THRESHOLD, TOP_K, GATE_ENABLED, DAILY_CHAT_CAP, PORT,
 } from './config.js';
@@ -140,6 +141,27 @@ async function handleAdmin(req, res, url) {
   if (sub.startsWith('entries/') && req.method === 'DELETE') {
     db.prepare('DELETE FROM entries WHERE id=?').run(decodeURIComponent(sub.slice(8)));
     return json(res, { ok: true });
+  }
+  if (sub === 'assist' && req.method === 'POST') {
+    const body = JSON.parse((await readBody(req)).toString() || '{}');
+    if (!body.input || !String(body.input).trim())
+      return json(res, { ok: false, error: 'input 为空' }, 400);
+    try {
+      const ids = db.prepare('SELECT id FROM entries').all().map((r) => r.id);
+      const drafts = await extractEntries(body.input, ids);
+      return json(res, { ok: true, drafts });
+    } catch (e) {
+      return json(res, { ok: false, error: '解析失败：' + e.message }, 500);
+    }
+  }
+  if (sub === 'next-id') {
+    // 自动分配下一个 KB-XX-000 ID（按前缀最大号+1）
+    const rows = db.prepare("SELECT id FROM entries").all();
+    const next = (pfx) => {
+      const nums = rows.map((r) => r.id.match(new RegExp('^KB-' + pfx + '-\\d+$')) ? Number(r.id.slice(-3)) : 0);
+      return 'KB-' + pfx + '-' + String(Math.max(0, ...nums) + 1).padStart(3, '0');
+    };
+    return json(res, { ok: true, model: next('MD'), raw: next('RM'), process: next('PR'), app: next('AP'), effect: next('EF') });
   }
   if (sub === 'upload-sign') {
     const sig = await signUpload(url.searchParams.get('content_type') || '');
