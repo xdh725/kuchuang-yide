@@ -97,6 +97,25 @@ async function handleChat(req, res, body) {
   return json(res, { reply, source: sourceLabel(top.metadata), fallback: false });
 }
 
+// ── 自动增量索引：素材保存/删除即生效，无需手动重建 ──
+async function autoIndex(entry) {
+  try {
+    const vec = await embed(entry.title + '\n' + entry.body_en + '\n' + entry.body_zh);
+    upsertVectors([{
+      id: entry.id, values: vec,
+      metadata: {
+        text: (entry.title + '\n' + entry.body_en + ' ' + entry.body_zh).slice(0, 1200),
+        title: entry.title, tags: entry.tags,
+        source_label: entry.id + ' · ' + entry.title, type: entry.type,
+      },
+    }]);
+    console.log('[auto-index] indexed', entry.id);
+  } catch (e) {
+    console.error('[auto-index] FAILED', entry.id, e.message); // 失败不影响保存；全量重建可修复
+  }
+}
+function removeFromIndex(id) { removeVectors([id]); }
+
 // ── admin ──
 async function handleAdmin(req, res, url) {
   const sub = url.pathname.replace('/api/admin/', '');
@@ -136,10 +155,14 @@ async function handleAdmin(req, res, url) {
         updated_at=datetime('now')`)
       .run(e.id, e.title, e.tags || '', e.type || 'text', e.media || null,
            e.body_en, e.body_zh, e.verified ? 1 : 0, e.verified_by || null);
+    if (e.verified) { autoIndex({ ...e, id: e.id }); }
+    else { removeFromIndex(e.id); } // 未核实条目确保不进检索
     return json(res, { ok: true });
   }
   if (sub.startsWith('entries/') && req.method === 'DELETE') {
-    db.prepare('DELETE FROM entries WHERE id=?').run(decodeURIComponent(sub.slice(8)));
+    const id = decodeURIComponent(sub.slice(8));
+    db.prepare('DELETE FROM entries WHERE id=?').run(id);
+    removeFromIndex(id);
     return json(res, { ok: true });
   }
   if (sub === 'assist' && req.method === 'POST') {

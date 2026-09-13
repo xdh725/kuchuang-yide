@@ -25,6 +25,11 @@ export function upsertVectors(vectors) {
   persist();
 }
 
+export function removeVectors(ids) {
+  store = store.filter((x) => !ids.includes(x.id));
+  persist();
+}
+
 function persist() {
   writeFileSync(VEC_FILE, JSON.stringify(store.map((x) => ({
     id: x.id, values: Array.from(x.values), metadata: x.metadata,
