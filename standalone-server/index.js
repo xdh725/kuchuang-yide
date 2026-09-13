@@ -89,10 +89,27 @@ async function handleChat(req, res, body) {
   try { reply = await runHarness(matches, message.trim(), L); }
   catch { return json(res, fallbackResponse(L, 'gen_error')); }
 
-  let verdict;
-  if (top.score > 0.75 && reply.length < 600) verdict = { verdict: 'PASS' };
-  else verdict = await postFilter(reply, matches);
-  if (verdict.verdict !== 'PASS') return json(res, fallbackResponse(L, 'filter_blocked'));
+  // 后置校验：旁路监控模式（不拦截，只记录）——2026-09-13 A/B 实验后降级
+  // 实验结论：校验器误杀率 50%（把"声明型号不存在"判成越界），Harness 实测零越界。
+  // 观察期：违规样本记日志，积累真实越界率数据后再决定恢复拦截或彻底移除。
+  let verdict = 'skipped';
+  let violations = null;
+  try {
+    if (!(top.score > 0.75 && reply.length < 600)) {
+      const v = await postFilter(reply, matches);
+      verdict = v.verdict;
+      if (v.verdict !== 'PASS') violations = v.violations || v.reason || null;
+    }
+  } catch (e) {
+    verdict = 'filter_error';
+  }
+  if (verdict !== 'PASS' && verdict !== 'skipped') {
+    console.log(JSON.stringify({
+      ev: 'filter_bypass_watch', ts: new Date().toISOString(),
+      q: message.trim().slice(0, 120), verdict, violations,
+      reply_head: reply.slice(0, 150), top_id: top.id, top_score: top.score.toFixed(3),
+    }));
+  }
 
   return json(res, { reply, source: sourceLabel(top.metadata), fallback: false });
 }
