@@ -175,7 +175,7 @@ async function handleAdmin(req, res, url) {
       const vec = await embed(e.title + '\n' + e.body_en + '\n' + e.body_zh);
       vectors.push({
         id: e.id, values: vec,
-        metadata: { text: (e.body_en + ' ' + e.body_zh).slice(0, 1200), title: e.title,
+        metadata: { text: (e.title + '\n' + e.body_en + ' ' + e.body_zh).slice(0, 1200), title: e.title,
                     tags: e.tags, source_label: e.id + ' · ' + e.title, type: e.type },
       });
     }
