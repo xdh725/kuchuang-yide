@@ -7,7 +7,7 @@ import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 import { db } from './db.js';
-import { loadVectors, query, upsertVectors } from './vecstore.js';
+import { loadVectors, query, upsertVectors, removeVectors } from './vecstore.js';
 import { runHarness, sourceLabel } from './harness.js';
 import { postFilter } from './postfilter.js';
 import { fallbackResponse } from './fallback.js';
