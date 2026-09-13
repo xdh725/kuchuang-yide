@@ -66,7 +66,9 @@ assets/     前端静态资源（css / js / img / video）
 
 ## 部署（2026-09-12 起：唯一线上站点 = 阿里云轻量服务器）
 
-- **唯一站点**：http://47.254.25.245 （workers.dev 已删除；GitHub Pages 早已下线）
+- **正式域名（HTTPS）**：https://maomaochong.fun （www 同效；http 301 跳 https；IP 47.254.25.245 仍可访问）
+  - 证书：Let's Encrypt，certbot 自动续期（systemd timer）
+  - DNS：阿里云 DNS（hichina），A 记录 @/www → 47.254.25.245
 - Workers 版代码（workers/）保留在仓库作 CF 参考实现；CF 账号资源（D1/Vectorize/KV）未删，可随时 `cd workers && wrangler deploy` 恢复
 - workers/ 下的源码改动不再自动上线；线上以 standalone-server/ + workers/public/（服务器 git pull）为准
 
